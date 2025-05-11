@@ -4,27 +4,7 @@
  https://chrome.google.com/extensions/detail/kkmlkkjojmombglmlpbpapmhcaljjkde
  */
 
-// Make this file a module with an empty export
-export {};
-
-// Define interfaces
-interface WordListEntry {
-  id?: number;
-  timestamp: number;
-  simplified: string;
-  traditional: string;
-  pinyin: string;
-  definition: string;
-  notes: string;
-  zhuyin?: string;
-}
-
-// Declare global functions from zhuyin.js
-declare global {
-  interface Window {
-    accentedPinyin2Zhuyin: (syllable: string) => string;
-  }
-}
+import { WordListEntry } from '../types';
 
 // Declare jQuery and DataTables
 declare const $: any;

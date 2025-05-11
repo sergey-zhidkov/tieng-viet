@@ -6,21 +6,7 @@
 
 'use strict';
 
-// Make this file a module with an empty export
-export {};
-
-// Define interface for the background page's zhongwenOptions
-interface ZhongwenOptions {
-  css: string;
-  tonecolors: string;
-  fontSize: string;
-  skritterTLD: string;
-  zhuyin: string;
-  grammar: string;
-  vocab: string;
-  simpTrad: string;
-  toneColorScheme: string;
-}
+import { ZhongwenOptions } from '../types';
 
 // Extend the chrome.extension type to include our background page
 declare namespace chrome.extension {

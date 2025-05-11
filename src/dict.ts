@@ -46,20 +46,7 @@
 
 'use strict';
 
-// Define interfaces for the dictionary data
-interface IDictionaryEntry {
-  data: Array<[string, string]>;
-  matchLen: number;
-  more?: number;
-  grammar?: {
-    keyword: string;
-    index: number;
-  };
-  vocab?: {
-    keyword: string;
-    index: number;
-  };
-}
+import { IDictionaryEntry } from './types';
 
 export class ZhongwenDictionary {
   private wordDict: string;

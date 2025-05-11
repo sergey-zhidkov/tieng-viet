@@ -47,60 +47,16 @@
 'use strict';
 
 import { ZhongwenDictionary } from './dict.js';
-
-// Define interfaces for the options and tab IDs
-interface ZhongwenOptions {
-  css: string;
-  tonecolors: string;
-  fontSize: string;
-  skritterTLD: string;
-  zhuyin: string;
-  grammar: string;
-  vocab: string;
-  simpTrad: string;
-  toneColorScheme: string;
-}
-
-interface TabIDs {
-  [key: string]: number;
-}
-
-interface WordlistEntry {
-  timestamp: number;
-  simplified: string;
-  traditional: string;
-  pinyin: string;
-  definition: string;
-}
-
-interface SearchRequest {
-  type: 'search';
-  text: string;
-  originalText: string;
-}
-
-interface OpenRequest {
-  type: 'open';
-  tabType: string;
-  url: string;
-}
-
-interface CopyRequest {
-  type: 'copy';
-  data: string;
-}
-
-interface AddRequest {
-  type: 'add';
-  entries: Array<{
-    simplified: string;
-    traditional: string;
-    pinyin: string;
-    definition: string;
-  }>;
-}
-
-type MessageRequest = SearchRequest | OpenRequest | CopyRequest | AddRequest;
+import {
+  ZhongwenOptions,
+  TabIDs,
+  WordListEntry,
+  MessageRequest,
+  SearchRequest,
+  OpenRequest,
+  CopyRequest,
+  AddRequest,
+} from './types';
 
 // let isEnabled = localStorage['enabled'] === '1';
 let isEnabled = false;

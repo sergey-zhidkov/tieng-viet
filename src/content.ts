@@ -48,50 +48,10 @@
 
 // 'use strict';
 
-// Make this file a module with an empty export
-// export {};
+import { ZhongwenConfig, SelEndItem, SearchResult } from './types';
 
-// Define interfaces for the configuration and search results
-interface ZhongwenConfig {
-  css: string;
-  tonecolors: string;
-  fontSize: string;
-  skritterTLD: string;
-  zhuyin: string;
-  grammar: string;
-  vocab: string;
-  simpTrad: string;
-  toneColorScheme: string;
-}
-
-interface SelEndItem {
-  node: Node;
-  offset: number;
-}
-
-interface SearchResult {
-  data: Array<Array<string>>;
-  matchLen: number;
-  more?: number;
-  grammar?: {
-    keyword: string;
-    index: number;
-  };
-  vocab?: {
-    keyword: string;
-    index: number;
-  };
-  originalText?: string;
-}
-
-// Declare global functions from zhuyin.js
-// declare global {
-//   interface Window {
-//     // numericPinyin2Zhuyin: (syllable: string) => string;
-//     // accentedPinyin2Zhuyin: (syllable: string) => string;
-//     $: any; // jQuery
-//   }
-// }
+// Declare jQuery
+declare const $: any;
 
 console.log('Zhongwen content script loaded', { window, document });
 
