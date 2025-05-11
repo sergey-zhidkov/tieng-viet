@@ -1,31 +1,39 @@
 {
-  "name": "zhongwen",
-  "version": "5.15.0",
-  "description": "Chinese Pop-Up Dictionary",
+  "name": "tieng-viet",
+  "version": "1.0.0",
+  "description": "Vietnamese Pop-Up Dictionary",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cschiller/zhongwen.git"
+    "url": "git+https://github.com/sergey-zhidkov/tieng-viet.git"
   },
   "keywords": [
-    "Chinese",
+    "Vietnamese",
     "Dictionary"
   ],
   "author": "Christian Schiller",
   "license": "GPL-2.0",
   "bugs": {
-    "url": "https://github.com/cschiller/zhongwen/issues"
+    "url": "https://github.com/sergey-zhidkov/tieng-viet/issues"
   },
-  "homepage": "https://github.com/cschiller/zhongwen#readme",
+  "homepage": "https://github.com/sergey-zhidkov/tieng-viet#readme",
   "devDependencies": {
-    "eslint": "^8.10.0",
-    "stylelint": "^14.5.3",
-    "stylelint-config-recommended": "^7.0.0"
-  },
-  "stylelint": {
-    "extends": "stylelint-config-recommended"
+    "@types/chrome": "^0.0.260",
+    "@types/firefox-webext-browser": "^111.0.1",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "copyfiles": "^2.4.1",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3",
+    "web-ext": "^7.11.0"
   },
   "scripts": {
-    "lint": "eslint --fix *.js js/options.js js/wordlist.js js/zhuyin.js",
-    "csslint": "stylelint css/content.css css/wordlist.css"
+    "csslint": "stylelint css/content.css css/wordlist.css",
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "copyfiles -u 1 \"src/**/*.{json,html,css,svg,png,ico}\" dist",
+    "watch": "tsc -w",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
   }
 }
