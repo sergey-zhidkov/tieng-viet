@@ -10,12 +10,12 @@
     "48": "images/zhongwen48.png",
     "128": "images/zhongwen.png"
   },
-  "browser_action": {
+  "action": {
     "default_icon": "images/zhongwen48.png",
     "default_title": "TiengViet Vietnamese Popup Dictionary"
   },
   "background": {
-    "page": "background.html"
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
@@ -31,9 +31,14 @@
   },
   "permissions": ["contextMenus", "tabs"],
   "commands": {
-    "_execute_browser_action": {
+    "_execute_action": {
       "description": "Enable/Disable TiengViet"
     }
   },
-  "web_accessible_resources": ["css/*", "js/*", "images/*"]
+  "web_accessible_resources": [
+    {
+      "resources": ["css/*", "js/*", "images/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

@@ -442,6 +442,7 @@ function onKeyDown(keyDown: KeyboardEvent): void {
 }
 
 function onMouseMove(mouseMove: MouseEvent): void {
+  console.log('onMouseMove', mouseMove);
   if (
     mouseMove.target instanceof HTMLElement &&
     (mouseMove.target.nodeName === 'TEXTAREA' ||

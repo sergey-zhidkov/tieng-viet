@@ -31,7 +31,7 @@
   "scripts": {
     "csslint": "stylelint css/content.css css/wordlist.css",
     "build": "tsc && npm run copy-assets",
-    "copy-assets": "copyfiles -u 1 \"src/**/*.{json,html,css,svg,png,ico}\" dist",
+    "copy-assets": "copyfiles -u 1 \"src/**/*.{json,html,css,svg,png,ico,js}\" dist",
     "watch": "tsc -w",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
