@@ -46,14 +46,45 @@
 
 /* global globalThis */
 
-// 'use strict';
+'use strict';
 
-import { ZhongwenConfig, SelEndItem, SearchResult } from './types';
+// Define interfaces for the configuration and search results
+interface ZhongwenConfig {
+  css: string;
+  tonecolors: string;
+  fontSize: string;
+  skritterTLD: string;
+  zhuyin: string;
+  grammar: string;
+  vocab: string;
+  simpTrad: string;
+  toneColorScheme: string;
+}
+
+interface SelEndItem {
+  node: Node;
+  offset: number;
+}
+
+interface SearchResult {
+  data: Array<Array<string>>;
+  matchLen: number;
+  more?: number;
+  grammar?: {
+    keyword: string;
+    index: number;
+  };
+  vocab?: {
+    keyword: string;
+    index: number;
+  };
+  originalText?: string;
+}
 
 // Declare jQuery
-declare const $: any;
+// declare const $: any;
 
-console.log('Zhongwen content script loaded', { window, document });
+console.log('Zhongwen content script loaded', { window, document, d: 'HERE' });
 
 let config: ZhongwenConfig;
 
@@ -201,9 +232,9 @@ function onKeyDown(keyDown: KeyboardEvent): void {
 
     case 82: // 'r'
       {
-        let entries = [];
+        const entries = [] as Record<string, string>[];
         for (let j = 0; j < savedSearchResults.length; j++) {
-          let entry = {
+          const entry = {
             simplified: savedSearchResults[j][0],
             traditional: savedSearchResults[j][1],
             pinyin: savedSearchResults[j][2],
