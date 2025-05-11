@@ -29,7 +29,8 @@
     "page": "options.html",
     "open_in_tab": true
   },
-  "permissions": ["contextMenus", "tabs"],
+  "permissions": ["contextMenus", "tabs", "storage", "scripting"],
+  "host_permissions": ["<all_urls>"],
   "commands": {
     "_execute_action": {
       "description": "Enable/Disable TiengViet"

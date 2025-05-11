@@ -102,13 +102,20 @@ interface AddRequest {
 
 type MessageRequest = SearchRequest | OpenRequest | CopyRequest | AddRequest;
 
-let isEnabled = localStorage['enabled'] === '1';
+// let isEnabled = localStorage['enabled'] === '1';
+let isEnabled = false;
+chrome.storage.local.get('enabled', (data) => {
+  isEnabled = data.enabled === '1';
+});
 
 let isActivated = false;
 
 let tabIDs: TabIDs = {};
 
 let dict: ZhongwenDictionary | undefined;
+const localStorage = {} as Record<string, string>;
+
+console.log('Zhongwen extension loaded', { window });
 
 let zhongwenOptions: ZhongwenOptions = ((window as any).zhongwenOptions = {
   css: localStorage['popupcolor'] || 'yellow',
@@ -127,7 +134,8 @@ function activateExtension(tabId: number, showHelp: boolean): void {
 
   isEnabled = true;
   // values in localStorage are always strings
-  localStorage['enabled'] = '1';
+  // localStorage['enabled'] = '1';
+  chrome.storage.local.set({ enabled: '1' });
 
   if (!dict) {
     loadDictionary().then((r) => (dict = r));
@@ -144,11 +152,11 @@ function activateExtension(tabId: number, showHelp: boolean): void {
     });
   }
 
-  chrome.browserAction.setBadgeBackgroundColor({
+  chrome.action.setBadgeBackgroundColor({
     color: [255, 0, 0, 255],
   });
 
-  chrome.browserAction.setBadgeText({
+  chrome.action.setBadgeText({
     text: 'On',
   });
 
@@ -212,17 +220,12 @@ function activateExtension(tabId: number, showHelp: boolean): void {
   });
 }
 
-async function loadDictData(): Promise<
-  [string, string, Record<string, boolean>, Record<string, boolean>]
-> {
-  let wordDict = fetch(chrome.runtime.getURL('data/cedict_ts.u8')).then((r) => r.text());
-  let wordIndex = fetch(chrome.runtime.getURL('data/cedict.idx')).then((r) => r.text());
-  let grammarKeywords = fetch(chrome.runtime.getURL('data/grammarKeywordsMin.json')).then((r) =>
-    r.json(),
-  );
-  let vocabKeywords = fetch(chrome.runtime.getURL('data/vocabularyKeywordsMin.json')).then((r) =>
-    r.json(),
-  );
+async function loadDictData(): Promise<[string, string, string, string]> {
+  let wordDict = fetch(chrome.runtime.getURL('data/vnedict.txt')).then((r) => r.text());
+  console.log({ wordDict });
+  const wordIndex = Promise.resolve(''); // fetch(chrome.runtime.getURL('data/cedict.idx')).then((r) => r.text());
+  let grammarKeywords = Promise.resolve(''); //fetch(chrome.runtime.getURL('data/grammarKeywordsMin.json')).then((r) => r.json(),);
+  let vocabKeywords = Promise.resolve(''); // fetch(chrome.runtime.getURL('data/vocabularyKeywordsMin.json')).then((r) =>r.json(),);
 
   return Promise.all([wordDict, wordIndex, grammarKeywords, vocabKeywords]);
 }
@@ -237,15 +240,16 @@ function deactivateExtension(): void {
 
   isEnabled = false;
   // values in localStorage are always strings
-  localStorage['enabled'] = '0';
+  // localStorage['enabled'] = '0';
+  chrome.storage.local.set({ enabled: '0' });
 
   dict = undefined;
 
-  chrome.browserAction.setBadgeBackgroundColor({
+  chrome.action.setBadgeBackgroundColor({
     color: [0, 0, 0, 0],
   });
 
-  chrome.browserAction.setBadgeText({
+  chrome.action.setBadgeText({
     text: '',
   });
 
@@ -314,7 +318,7 @@ function search(text: string): any {
   return entry;
 }
 
-chrome.browserAction.onClicked.addListener(activateExtensionToggle);
+chrome.action.onClicked.addListener(activateExtensionToggle);
 
 chrome.tabs.onActivated.addListener((activeInfo) => {
   if (activeInfo.tabId !== undefined) {
@@ -345,7 +349,8 @@ function createTab(url: string, tabType: string): void {
   });
 }
 
-chrome.runtime.onMessage.addListener(function (request: MessageRequest, sender, callback) {
+chrome.runtime.onMessage.addListener((request: MessageRequest, sender, callback) => {
+  console.log('Received message:', { request, sender });
   let tabID: number | undefined;
 
   switch (request.type) {
@@ -379,48 +384,44 @@ chrome.runtime.onMessage.addListener(function (request: MessageRequest, sender, 
 
     case 'copy':
       {
-        let txt = document.createElement('textarea');
-        txt.style.position = 'absolute';
-        txt.style.left = '-100%';
-        txt.value = request.data;
-        document.body.appendChild(txt);
-        txt.select();
-        document.execCommand('copy');
-        document.body.removeChild(txt);
+        // TODO: move to content script
+        // let txt = document.createElement('textarea');
+        // txt.style.position = 'absolute';
+        // txt.style.left = '-100%';
+        // txt.value = request.data;
+        // document.body.appendChild(txt);
+        // txt.select();
+        // document.execCommand('copy');
+        // document.body.removeChild(txt);
       }
       break;
 
     case 'add':
       {
-        let json = localStorage['wordlist'];
-
-        let saveFirstEntryOnly = localStorage['saveToWordList'] === 'firstEntryOnly';
-
-        let wordlist: WordlistEntry[];
-        if (json) {
-          wordlist = JSON.parse(json);
-        } else {
-          wordlist = [];
-        }
-
-        for (let i in request.entries) {
-          let entry: WordlistEntry = {
-            timestamp: Date.now(),
-            simplified: request.entries[i].simplified,
-            traditional: request.entries[i].traditional,
-            pinyin: request.entries[i].pinyin,
-            definition: request.entries[i].definition,
-          };
-
-          wordlist.push(entry);
-
-          if (saveFirstEntryOnly) {
-            break;
-          }
-        }
-        localStorage['wordlist'] = JSON.stringify(wordlist);
-
-        tabID = tabIDs['wordlist'];
+        // TODO: update localStorage use
+        // let json = localStorage['wordlist'];
+        // let saveFirstEntryOnly = localStorage['saveToWordList'] === 'firstEntryOnly';
+        // let wordlist: WordlistEntry[];
+        // if (json) {
+        //   wordlist = JSON.parse(json);
+        // } else {
+        //   wordlist = [];
+        // }
+        // for (let i in request.entries) {
+        //   let entry: WordlistEntry = {
+        //     timestamp: Date.now(),
+        //     simplified: request.entries[i].simplified,
+        //     traditional: request.entries[i].traditional,
+        //     pinyin: request.entries[i].pinyin,
+        //     definition: request.entries[i].definition,
+        //   };
+        //   wordlist.push(entry);
+        //   if (saveFirstEntryOnly) {
+        //     break;
+        //   }
+        // }
+        // localStorage['wordlist'] = JSON.stringify(wordlist);
+        // tabID = tabIDs['wordlist'];
       }
       break;
   }

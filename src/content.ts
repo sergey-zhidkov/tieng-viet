@@ -46,10 +46,10 @@
 
 /* global globalThis */
 
-'use strict';
+// 'use strict';
 
 // Make this file a module with an empty export
-export {};
+// export {};
 
 // Define interfaces for the configuration and search results
 interface ZhongwenConfig {
@@ -85,13 +85,15 @@ interface SearchResult {
 }
 
 // Declare global functions from zhuyin.js
-declare global {
-  interface Window {
-    numericPinyin2Zhuyin: (syllable: string) => string;
-    accentedPinyin2Zhuyin: (syllable: string) => string;
-    $: any; // jQuery
-  }
-}
+// declare global {
+//   interface Window {
+//     // numericPinyin2Zhuyin: (syllable: string) => string;
+//     // accentedPinyin2Zhuyin: (syllable: string) => string;
+//     $: any; // jQuery
+//   }
+// }
+
+console.log('Zhongwen content script loaded', { window, document });
 
 let config: ZhongwenConfig;
 
@@ -1164,14 +1166,14 @@ function pinyinAndZhuyin(
         zhuyinClass += '-small';
       }
 
-      zhuyin +=
-        '<span class="tone' +
-        m[4] +
-        ' ' +
-        zhuyinClass +
-        '">' +
-        window.numericPinyin2Zhuyin(syllable) +
-        '</span>';
+      // zhuyin +=
+      //   '<span class="tone' +
+      //   m[4] +
+      //   ' ' +
+      //   zhuyinClass +
+      //   '">' +
+      //   window.numericPinyin2Zhuyin(syllable) +
+      //   '</span>';
     }
   }
   return [html, text, zhuyin];
@@ -1214,6 +1216,7 @@ let miniHelp = `
 
 // event listener
 chrome.runtime.onMessage.addListener(function (request) {
+  console.log('onMessage', request);
   switch (request.type) {
     case 'enable':
       enableTab();

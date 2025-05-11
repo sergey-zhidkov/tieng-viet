@@ -64,16 +64,11 @@ interface IDictionaryEntry {
 export class ZhongwenDictionary {
   private wordDict: string;
   private wordIndex: string;
-  private grammarKeywords: Record<string, boolean>;
-  private vocabKeywords: Record<string, boolean>;
+  private grammarKeywords: string;
+  private vocabKeywords: string;
   private cache: Record<string, Array<string>>;
 
-  constructor(
-    wordDict: string,
-    wordIndex: string,
-    grammarKeywords: Record<string, boolean>,
-    vocabKeywords: Record<string, boolean>,
-  ) {
+  constructor(wordDict: string, wordIndex: string, grammarKeywords: string, vocabKeywords: string) {
     this.wordDict = wordDict;
     this.wordIndex = wordIndex;
     this.grammarKeywords = grammarKeywords;
@@ -103,11 +98,13 @@ export class ZhongwenDictionary {
   }
 
   hasGrammarKeyword(keyword: string): boolean {
-    return this.grammarKeywords[keyword];
+    return false;
+    // return this.grammarKeywords[keyword];
   }
 
   hasVocabKeyword(keyword: string): boolean {
-    return this.vocabKeywords[keyword];
+    return false;
+    // return this.vocabKeywords[keyword];
   }
 
   wordSearch(word: string, max?: number): IDictionaryEntry | null {
