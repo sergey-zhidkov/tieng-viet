@@ -1206,7 +1206,7 @@ let miniHelp = `
     </table>`;
 
 // event listener
-chrome.runtime.onMessage.addListener(function (request) {
+chrome.runtime.onMessage.addListener((request) => {
   console.log('onMessage', request);
   switch (request.type) {
     case 'enable':
@@ -1216,18 +1216,18 @@ chrome.runtime.onMessage.addListener(function (request) {
     case 'disable':
       disableTab();
       break;
-    case 'showPopup':
-      if (!request.isHelp || window === window.top) {
-        showPopup(request.text);
-      }
-      break;
-    case 'showHelp':
-      showPopup(miniHelp);
-      break;
-    default:
+    // case 'showPopup':
+    //   if (!request.isHelp || window === window.top) {
+    //     showPopup(request.text);
+    //   }
+    //   break;
+    // case 'showHelp':
+    //   showPopup(miniHelp);
+    //   break;
+    // default:
   }
 });
 
-chrome.runtime.sendMessage({ type: 'search', query: 'query' }, (response) => {
-  console.log('Results:', response.results);
-});
+// chrome.runtime.sendMessage({ type: 'search', query: 'query' }, (response) => {
+//   console.log('Results:', response.results);
+// });

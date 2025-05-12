@@ -140,34 +140,34 @@
 // /**
 //  * Message request types
 //  */
-// export interface SearchRequest {
-//   type: 'search';
-//   text: string;
-//   originalText: string;
-// }
+interface SearchRequest {
+  type: 'search';
+  text: string;
+  originalText: string;
+}
 
-// export interface OpenRequest {
-//   type: 'open';
-//   tabType: string;
-//   url: string;
-// }
+interface OpenRequest {
+  type: 'open';
+  tabType: string;
+  url: string;
+}
 
-// export interface CopyRequest {
-//   type: 'copy';
-//   data: string;
-// }
+interface CopyRequest {
+  type: 'copy';
+  data: string;
+}
 
-// export interface AddRequest {
-//   type: 'add';
-//   entries: Array<{
-//     simplified: string;
-//     traditional: string;
-//     pinyin: string;
-//     definition: string;
-//   }>;
-// }
+interface AddRequest {
+  type: 'add';
+  entries: Array<{
+    simplified: string;
+    traditional: string;
+    pinyin: string;
+    definition: string;
+  }>;
+}
 
-// export type MessageRequest = SearchRequest | OpenRequest | CopyRequest | AddRequest;
+type MessageRequest = SearchRequest | OpenRequest | CopyRequest | AddRequest;
 
 console.log('Zhongwen extension loaded', {});
 
@@ -196,96 +196,99 @@ console.log('Zhongwen extension loaded', {});
 //   toneColorScheme: localStorage['toneColorScheme'] || 'standard',
 // });
 
-// function activateExtension(tabId: number, showHelp: boolean): void {
-//   isActivated = true;
+function activateExtension(tabId: number, showHelp: boolean): void {
+  chrome.storage.local.set({ enabled: '1' });
+  chrome.storage.local.set({ activated: '1' });
+  // isActivated = true;
 
-//   isEnabled = true;
-//   // values in localStorage are always strings
-//   // localStorage['enabled'] = '1';
-//   chrome.storage.local.set({ enabled: '1' });
+  // isEnabled = true;
+  // values in localStorage are always strings
+  // localStorage['enabled'] = '1';
+  // chrome.storage.local.set({ enabled: '1' });
 
-//   if (!dict) {
-//     loadDictionary().then((r) => (dict = r));
-//   }
+  // if (!dict) {
+  //   loadDictionary().then((r) => (dict = r));
+  // }
 
-//   chrome.tabs.sendMessage(tabId, {
-//     type: 'enable',
-//     config: zhongwenOptions,
-//   });
+  chrome.tabs.sendMessage(tabId, {
+    type: 'enable',
+    // config: zhongwenOptions,
+    config: {},
+  });
 
-//   if (showHelp) {
-//     chrome.tabs.sendMessage(tabId, {
-//       type: 'showHelp',
-//     });
-//   }
+  // if (showHelp) {
+  //   chrome.tabs.sendMessage(tabId, {
+  //     type: 'showHelp',
+  //   });
+  // }
 
-//   chrome.action.setBadgeBackgroundColor({
-//     color: [255, 0, 0, 255],
-//   });
+  chrome.action.setBadgeBackgroundColor({
+    color: [255, 0, 0, 255],
+  });
 
-//   chrome.action.setBadgeText({
-//     text: 'On',
-//   });
+  chrome.action.setBadgeText({
+    text: 'On',
+  });
 
-//   chrome.contextMenus.create({
-//     title: 'Open word list',
-//     onclick: function (): void {
-//       let url = '/wordlist.html';
-//       let tabID = tabIDs['wordlist'];
-//       if (tabID) {
-//         chrome.tabs.get(tabID, function (tab) {
-//           if (tab && tab.url && tab.url.endsWith('wordlist.html')) {
-//             chrome.tabs.update(tabID, {
-//               active: true,
-//             });
-//           } else {
-//             chrome.tabs.create(
-//               {
-//                 url: url,
-//               },
-//               function (tab) {
-//                 tabIDs['wordlist'] = tab.id as number;
-//               },
-//             );
-//           }
-//         });
-//       } else {
-//         chrome.tabs.create({ url: url }, function (tab) {
-//           tabIDs['wordlist'] = tab.id as number;
-//         });
-//       }
-//     },
-//   });
-//   chrome.contextMenus.create({
-//     title: 'Show help in new tab',
-//     onclick: function (): void {
-//       let url = '/help.html';
-//       let tabID = tabIDs['help'];
-//       if (tabID) {
-//         chrome.tabs.get(tabID, function (tab) {
-//           if (tab && tab.url && tab.url.endsWith('help.html')) {
-//             chrome.tabs.update(tabID, {
-//               active: true,
-//             });
-//           } else {
-//             chrome.tabs.create(
-//               {
-//                 url: url,
-//               },
-//               function (tab) {
-//                 tabIDs['help'] = tab.id as number;
-//               },
-//             );
-//           }
-//         });
-//       } else {
-//         chrome.tabs.create({ url: url }, function (tab) {
-//           tabIDs['help'] = tab.id as number;
-//         });
-//       }
-//     },
-//   });
-// }
+  // chrome.contextMenus.create({
+  //   title: 'Open word list',
+  //   onclick: function (): void {
+  //     let url = '/wordlist.html';
+  //     let tabID = tabIDs['wordlist'];
+  //     if (tabID) {
+  //       chrome.tabs.get(tabID, function (tab) {
+  //         if (tab && tab.url && tab.url.endsWith('wordlist.html')) {
+  //           chrome.tabs.update(tabID, {
+  //             active: true,
+  //           });
+  //         } else {
+  //           chrome.tabs.create(
+  //             {
+  //               url: url,
+  //             },
+  //             function (tab) {
+  //               tabIDs['wordlist'] = tab.id as number;
+  //             },
+  //           );
+  //         }
+  //       });
+  //     } else {
+  //       chrome.tabs.create({ url: url }, function (tab) {
+  //         tabIDs['wordlist'] = tab.id as number;
+  //       });
+  //     }
+  //   },
+  // });
+  // chrome.contextMenus.create({
+  //   title: 'Show help in new tab',
+  //   onclick: function (): void {
+  //     let url = '/help.html';
+  //     let tabID = tabIDs['help'];
+  //     if (tabID) {
+  //       chrome.tabs.get(tabID, function (tab) {
+  //         if (tab && tab.url && tab.url.endsWith('help.html')) {
+  //           chrome.tabs.update(tabID, {
+  //             active: true,
+  //           });
+  //         } else {
+  //           chrome.tabs.create(
+  //             {
+  //               url: url,
+  //             },
+  //             function (tab) {
+  //               tabIDs['help'] = tab.id as number;
+  //             },
+  //           );
+  //         }
+  //       });
+  //     } else {
+  //       chrome.tabs.create({ url: url }, function (tab) {
+  //         tabIDs['help'] = tab.id as number;
+  //       });
+  //     }
+  //   },
+  // });
+}
 
 // async function loadDictData(): Promise<[string, string, string, string]> {
 //   let wordDict = fetch(chrome.runtime.getURL('data/vnedict.txt')).then((r) => r.text());
@@ -302,50 +305,56 @@ console.log('Zhongwen extension loaded', {});
 //   return new ZhongwenDictionary(wordDict, wordIndex, grammarKeywords, vocabKeywords);
 // }
 
-// function deactivateExtension(): void {
-//   isActivated = false;
+function deactivateExtension(): void {
+  // isActivated = false;
 
-//   isEnabled = false;
-//   // values in localStorage are always strings
-//   // localStorage['enabled'] = '0';
-//   chrome.storage.local.set({ enabled: '0' });
+  // isEnabled = false;
+  // values in localStorage are always strings
+  // localStorage['enabled'] = '0';
+  chrome.storage.local.set({ enabled: '0' });
+  chrome.storage.local.set({ activated: '0' });
 
-//   dict = undefined;
+  // dict = undefined;
 
-//   chrome.action.setBadgeBackgroundColor({
-//     color: [0, 0, 0, 0],
-//   });
+  chrome.action.setBadgeBackgroundColor({
+    color: [0, 0, 0, 0],
+  });
 
-//   chrome.action.setBadgeText({
-//     text: '',
-//   });
+  chrome.action.setBadgeText({
+    text: '',
+  });
 
-//   // Send a disable message to all tabs in all windows.
-//   chrome.windows.getAll({ populate: true }, function (windows) {
-//     for (let i = 0; i < windows.length; ++i) {
-//       let tabs = windows[i].tabs || [];
-//       for (let j = 0; j < tabs.length; ++j) {
-//         if (tabs[j].id) {
-//           chrome.tabs.sendMessage(tabs[j].id, {
-//             type: 'disable',
-//           });
-//         }
-//       }
-//     }
-//   });
+  // Send a disable message to all tabs in all windows.
+  chrome.windows.getAll({ populate: true }, function (windows) {
+    for (let i = 0; i < windows.length; ++i) {
+      let tabs = windows[i].tabs || [];
+      for (let j = 0; j < tabs.length; ++j) {
+        if (tabs[j].id) {
+          chrome.tabs.sendMessage(tabs[j].id, {
+            type: 'disable',
+          });
+        }
+      }
+    }
+  });
 
-//   chrome.contextMenus.removeAll();
-// }
+  chrome.contextMenus.removeAll();
+}
 
-// function activateExtensionToggle(currentTab: chrome.tabs.Tab): void {
-//   if (isActivated) {
-//     deactivateExtension();
-//   } else {
-//     if (currentTab.id) {
-//       activateExtension(currentTab.id, true);
-//     }
-//   }
-// }
+function activateExtensionToggle(currentTab: chrome.tabs.Tab): void {
+  chrome.storage.local.get('activated', (result) => {
+    console.log('Enabled?', result.activated);
+    const isActivated = result.activated === '1';
+
+    if (isActivated) {
+      deactivateExtension();
+    } else {
+      if (currentTab.id) {
+        activateExtension(currentTab.id, true);
+      }
+    }
+  });
+}
 
 // function enableTab(tabId: number): void {
 //   if (isEnabled) {
@@ -385,7 +394,7 @@ console.log('Zhongwen extension loaded', {});
 //   return entry;
 // }
 
-// chrome.action.onClicked.addListener(activateExtensionToggle);
+chrome.action.onClicked.addListener(activateExtensionToggle);
 
 // chrome.tabs.onActivated.addListener((activeInfo) => {
 //   if (activeInfo.tabId !== undefined) {
@@ -416,170 +425,171 @@ console.log('Zhongwen extension loaded', {});
 //   });
 // }
 
-// chrome.runtime.onMessage.addListener((request: MessageRequest, sender, callback) => {
-//   console.log('Received message:', { request, sender });
-//   callback({ resp: 'ping' });
-//   let tabID: number | undefined;
+chrome.runtime.onMessage.addListener((request: MessageRequest, sender, callback) => {
+  console.log('Received message:', { request, sender });
+  callback({ resp: 'ping' });
+  let tabID: number | undefined;
 
-//   // ensureDictLoaded().then((dictText) => {
-//   //   const results = searchDictionary(dictText as string, (request as { text: string })?.text);
-//   //   callback({ results });
-//   // });
+  ensureDictLoaded().then((dictText) => {
+    console.log('Search results:', { dictText });
+    const results = searchDictionary(dictText as string, (request as { text: string })?.text);
+    callback({ results });
+  });
 
-//   switch (request.type) {
-//     case 'search':
-//       {
-//         // let response = search(request.text);
-//         // if (response) {
-//         //   response.originalText = request.originalText;
-//         // }
-//         // callback(response);
-//       }
-//       break;
+  switch (request.type) {
+    case 'search':
+      {
+        // let response = search(request.text);
+        // if (response) {
+        //   response.originalText = request.originalText;
+        // }
+        // callback(response);
+      }
+      break;
 
-//     case 'open':
-//       {
-//         // tabID = tabIDs[request.tabType];
-//         // if (tabID) {
-//         //   chrome.tabs.get(tabID, () => {
-//         //     if (!chrome.runtime.lastError) {
-//         //       // activate existing tab
-//         //       chrome.tabs.update(tabID as number, { active: true, url: request.url });
-//         //     } else {
-//         //       createTab(request.url, request.tabType);
-//         //     }
-//         //   });
-//         // } else {
-//         //   createTab(request.url, request.tabType);
-//         // }
-//       }
-//       break;
+    case 'open':
+      {
+        // tabID = tabIDs[request.tabType];
+        // if (tabID) {
+        //   chrome.tabs.get(tabID, () => {
+        //     if (!chrome.runtime.lastError) {
+        //       // activate existing tab
+        //       chrome.tabs.update(tabID as number, { active: true, url: request.url });
+        //     } else {
+        //       createTab(request.url, request.tabType);
+        //     }
+        //   });
+        // } else {
+        //   createTab(request.url, request.tabType);
+        // }
+      }
+      break;
 
-//     case 'copy':
-//       {
-//         // TODO: move to content script
-//         // let txt = document.createElement('textarea');
-//         // txt.style.position = 'absolute';
-//         // txt.style.left = '-100%';
-//         // txt.value = request.data;
-//         // document.body.appendChild(txt);
-//         // txt.select();
-//         // document.execCommand('copy');
-//         // document.body.removeChild(txt);
-//       }
-//       break;
+    case 'copy':
+      {
+        // TODO: move to content script
+        // let txt = document.createElement('textarea');
+        // txt.style.position = 'absolute';
+        // txt.style.left = '-100%';
+        // txt.value = request.data;
+        // document.body.appendChild(txt);
+        // txt.select();
+        // document.execCommand('copy');
+        // document.body.removeChild(txt);
+      }
+      break;
 
-//     case 'add':
-//       {
-//         // TODO: update localStorage use
-//         // let json = localStorage['wordlist'];
-//         // let saveFirstEntryOnly = localStorage['saveToWordList'] === 'firstEntryOnly';
-//         // let wordlist: WordlistEntry[];
-//         // if (json) {
-//         //   wordlist = JSON.parse(json);
-//         // } else {
-//         //   wordlist = [];
-//         // }
-//         // for (let i in request.entries) {
-//         //   let entry: WordlistEntry = {
-//         //     timestamp: Date.now(),
-//         //     simplified: request.entries[i].simplified,
-//         //     traditional: request.entries[i].traditional,
-//         //     pinyin: request.entries[i].pinyin,
-//         //     definition: request.entries[i].definition,
-//         //   };
-//         //   wordlist.push(entry);
-//         //   if (saveFirstEntryOnly) {
-//         //     break;
-//         //   }
-//         // }
-//         // localStorage['wordlist'] = JSON.stringify(wordlist);
-//         // tabID = tabIDs['wordlist'];
-//       }
-//       break;
-//   }
+    case 'add':
+      {
+        // TODO: update localStorage use
+        // let json = localStorage['wordlist'];
+        // let saveFirstEntryOnly = localStorage['saveToWordList'] === 'firstEntryOnly';
+        // let wordlist: WordlistEntry[];
+        // if (json) {
+        //   wordlist = JSON.parse(json);
+        // } else {
+        //   wordlist = [];
+        // }
+        // for (let i in request.entries) {
+        //   let entry: WordlistEntry = {
+        //     timestamp: Date.now(),
+        //     simplified: request.entries[i].simplified,
+        //     traditional: request.entries[i].traditional,
+        //     pinyin: request.entries[i].pinyin,
+        //     definition: request.entries[i].definition,
+        //   };
+        //   wordlist.push(entry);
+        //   if (saveFirstEntryOnly) {
+        //     break;
+        //   }
+        // }
+        // localStorage['wordlist'] = JSON.stringify(wordlist);
+        // tabID = tabIDs['wordlist'];
+      }
+      break;
+  }
 
-//   // Return true to indicate we want to use sendResponse asynchronously
-//   return true;
+  // Return true to indicate we want to use sendResponse asynchronously
+  return true;
+});
+
+// chrome.runtime.onInstalled.addListener(() => {
+//   console.log('Extension installed');
 // });
 
-chrome.runtime.onInstalled.addListener(() => {
-  console.log('Extension installed');
-});
-
 // 2. Extension icon clicked
-chrome.action.onClicked.addListener((tab) => {
-  console.log('Extension icon clicked');
-});
+// chrome.action.onClicked.addListener((tab) => {
+//   console.log('Extension icon clicked');
+// });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete') {
-    console.log('Tab finished loading:', tab.url);
-  }
-});
+// chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+//   if (changeInfo.status === 'complete') {
+//     console.log('Tab finished loading:', tab.url);
+//   }
+// });
 
 // chrome.alarms.onAlarm.addListener((alarm) => {
 //   console.log('Alarm triggered:', alarm.name);
 // });
 
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  sendResponse({ pong: true });
-});
+// chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+//   sendResponse({ pong: true });
+// });
 
-// let db: IDBDatabase;
+let db: IDBDatabase;
 
-// function openDatabase(): Promise<IDBDatabase> {
-//   return new Promise((resolve, reject) => {
-//     const request = indexedDB.open('ZhongwenDB', 1);
+function openDatabase(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('ZhongwenDB', 1);
 
-//     request.onupgradeneeded = (event) => {
-//       db = request.result;
-//       db.createObjectStore('dictionary');
-//     };
+    request.onupgradeneeded = (event) => {
+      db = request.result;
+      db.createObjectStore('dictionary');
+    };
 
-//     request.onsuccess = () => {
-//       db = request.result;
-//       resolve(db);
-//     };
+    request.onsuccess = () => {
+      db = request.result;
+      resolve(db);
+    };
 
-//     request.onerror = () => {
-//       reject(request.error);
-//     };
-//   });
-// }
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+}
 
-// function saveToIndexedDB(text: string) {
-//   return openDatabase().then((db) => {
-//     const tx = db.transaction('dictionary', 'readwrite');
-//     const store = tx.objectStore('dictionary');
-//     store.put(text, 'dict');
-//     // return tx.complete;
-//   });
-// }
+function saveToIndexedDB(text: string) {
+  return openDatabase().then((db) => {
+    const tx = db.transaction('dictionary', 'readwrite');
+    const store = tx.objectStore('dictionary');
+    store.put(text, 'dict');
+    // return tx.complete;
+  });
+}
 
-// function getFromIndexedDB() {
-//   return openDatabase().then((db) => {
-//     return new Promise((resolve, reject) => {
-//       const tx = db.transaction('dictionary', 'readonly');
-//       const store = tx.objectStore('dictionary');
-//       const request = store.get('dict');
-//       request.onsuccess = () => resolve(request.result);
-//       request.onerror = () => reject(request.error);
-//     });
-//   });
-// }
+function getFromIndexedDB() {
+  return openDatabase().then((db) => {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('dictionary', 'readonly');
+      const store = tx.objectStore('dictionary');
+      const request = store.get('dict');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  });
+}
 
-// async function ensureDictLoaded() {
-//   const existing = await getFromIndexedDB();
-//   if (existing) return existing;
+async function ensureDictLoaded() {
+  const existing = await getFromIndexedDB();
+  if (existing) return existing;
 
-//   const response = await fetch(chrome.runtime.getURL('data/vnedict.txt'));
-//   const text = await response.text();
-//   await saveToIndexedDB(text);
-//   return text;
-// }
+  const response = await fetch(chrome.runtime.getURL('data/vnedict.txt'));
+  const text = await response.text();
+  await saveToIndexedDB(text);
+  return text;
+}
 
-// function searchDictionary(dictText: string, query: string) {
-//   const lines: string[] = dictText.split('\n');
-//   return lines.filter((line) => line.includes(query)).slice(0, 10); // example: return top 10 matches
-// }
+function searchDictionary(dictText: string, query: string) {
+  const lines: string[] = dictText.split('\n');
+  return lines.filter((line) => line.includes(query)).slice(0, 10); // example: return top 10 matches
+}
