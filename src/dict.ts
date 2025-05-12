@@ -46,104 +46,104 @@
 
 'use strict';
 
-import { IDictionaryEntry } from './types';
+// import { IDictionaryEntry } from './types';
 
-export class ZhongwenDictionary {
-  private wordDict: string;
-  private wordIndex: string;
-  private grammarKeywords: string;
-  private vocabKeywords: string;
-  private cache: Record<string, Array<string>>;
+// export class ZhongwenDictionary {
+//   private wordDict: string;
+//   private wordIndex: string;
+//   private grammarKeywords: string;
+//   private vocabKeywords: string;
+//   private cache: Record<string, Array<string>>;
 
-  constructor(wordDict: string, wordIndex: string, grammarKeywords: string, vocabKeywords: string) {
-    this.wordDict = wordDict;
-    this.wordIndex = wordIndex;
-    this.grammarKeywords = grammarKeywords;
-    this.vocabKeywords = vocabKeywords;
-    this.cache = {};
-  }
+//   constructor(wordDict: string, wordIndex: string, grammarKeywords: string, vocabKeywords: string) {
+//     this.wordDict = wordDict;
+//     this.wordIndex = wordIndex;
+//     this.grammarKeywords = grammarKeywords;
+//     this.vocabKeywords = vocabKeywords;
+//     this.cache = {};
+//   }
 
-  static find(needle: string, haystack: string): string | null {
-    let beg = 0;
-    let end = haystack.length - 1;
+//   static find(needle: string, haystack: string): string | null {
+//     let beg = 0;
+//     let end = haystack.length - 1;
 
-    while (beg < end) {
-      const mi = Math.floor((beg + end) / 2);
-      const i = haystack.lastIndexOf('\n', mi) + 1;
+//     while (beg < end) {
+//       const mi = Math.floor((beg + end) / 2);
+//       const i = haystack.lastIndexOf('\n', mi) + 1;
 
-      const mis = haystack.substr(i, needle.length);
-      if (needle < mis) {
-        end = i - 1;
-      } else if (needle > mis) {
-        beg = haystack.indexOf('\n', mi + 1) + 1;
-      } else {
-        return haystack.substring(i, haystack.indexOf('\n', mi + 1));
-      }
-    }
+//       const mis = haystack.substr(i, needle.length);
+//       if (needle < mis) {
+//         end = i - 1;
+//       } else if (needle > mis) {
+//         beg = haystack.indexOf('\n', mi + 1) + 1;
+//       } else {
+//         return haystack.substring(i, haystack.indexOf('\n', mi + 1));
+//       }
+//     }
 
-    return null;
-  }
+//     return null;
+//   }
 
-  hasGrammarKeyword(keyword: string): boolean {
-    return false;
-    // return this.grammarKeywords[keyword];
-  }
+//   hasGrammarKeyword(keyword: string): boolean {
+//     return false;
+//     // return this.grammarKeywords[keyword];
+//   }
 
-  hasVocabKeyword(keyword: string): boolean {
-    return false;
-    // return this.vocabKeywords[keyword];
-  }
+//   hasVocabKeyword(keyword: string): boolean {
+//     return false;
+//     // return this.vocabKeywords[keyword];
+//   }
 
-  wordSearch(word: string, max?: number): IDictionaryEntry | null {
-    const entry: IDictionaryEntry = { data: [], matchLen: 0 };
+//   wordSearch(word: string, max?: number): IDictionaryEntry | null {
+//     const entry: IDictionaryEntry = { data: [], matchLen: 0 };
 
-    const dict = this.wordDict;
-    const index = this.wordIndex;
+//     const dict = this.wordDict;
+//     const index = this.wordIndex;
 
-    const maxTrim = max || 7;
+//     const maxTrim = max || 7;
 
-    let count = 0;
-    let maxLen = 0;
+//     let count = 0;
+//     let maxLen = 0;
 
-    WHILE: while (word.length > 0) {
-      let ix = this.cache[word];
-      if (!ix) {
-        const result = ZhongwenDictionary.find(word + ',', index);
-        if (!result) {
-          this.cache[word] = [];
-          word = word.substr(0, word.length - 1);
-          continue;
-        }
-        ix = result.split(',');
-        this.cache[word] = ix;
-      }
+//     WHILE: while (word.length > 0) {
+//       let ix = this.cache[word];
+//       if (!ix) {
+//         const result = ZhongwenDictionary.find(word + ',', index);
+//         if (!result) {
+//           this.cache[word] = [];
+//           word = word.substr(0, word.length - 1);
+//           continue;
+//         }
+//         ix = result.split(',');
+//         this.cache[word] = ix;
+//       }
 
-      for (let j = 1; j < ix.length; ++j) {
-        const offset = parseInt(ix[j], 10);
+//       for (let j = 1; j < ix.length; ++j) {
+//         const offset = parseInt(ix[j], 10);
 
-        const dentry = dict.substring(offset, dict.indexOf('\n', offset));
+//         const dentry = dict.substring(offset, dict.indexOf('\n', offset));
 
-        if (count >= maxTrim) {
-          entry.more = 1;
-          break WHILE;
-        }
+//         if (count >= maxTrim) {
+//           entry.more = 1;
+//           break WHILE;
+//         }
 
-        ++count;
-        if (maxLen === 0) {
-          maxLen = word.length;
-        }
+//         ++count;
+//         if (maxLen === 0) {
+//           maxLen = word.length;
+//         }
 
-        entry.data.push([dentry, word]);
-      }
+//         entry.data.push([dentry, word]);
+//       }
 
-      word = word.substr(0, word.length - 1);
-    }
+//       word = word.substr(0, word.length - 1);
+//     }
 
-    if (entry.data.length === 0) {
-      return null;
-    }
+//     if (entry.data.length === 0) {
+//       return null;
+//     }
 
-    entry.matchLen = maxLen;
-    return entry;
-  }
-}
+//     entry.matchLen = maxLen;
+//     return entry;
+//   }
+// }

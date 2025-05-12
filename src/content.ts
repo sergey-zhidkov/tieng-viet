@@ -1227,3 +1227,7 @@ chrome.runtime.onMessage.addListener(function (request) {
     default:
   }
 });
+
+chrome.runtime.sendMessage({ type: 'search', query: 'query' }, (response) => {
+  console.log('Results:', response.results);
+});
