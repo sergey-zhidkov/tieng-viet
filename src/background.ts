@@ -197,6 +197,7 @@ console.log('Zhongwen extension loaded', {});
 // });
 
 function activateExtension(tabId: number, showHelp: boolean): void {
+  console.log('Activating extension', { tabId, showHelp });
   chrome.storage.local.set({ enabled: '1' });
   chrome.storage.local.set({ activated: '1' });
   // isActivated = true;
@@ -343,7 +344,7 @@ function deactivateExtension(): void {
 
 function activateExtensionToggle(currentTab: chrome.tabs.Tab): void {
   chrome.storage.local.get('activated', (result) => {
-    console.log('Enabled?', result.activated);
+    console.log('Enabled?', result.activated, { currentTab });
     const isActivated = result.activated === '1';
 
     if (isActivated) {
@@ -356,18 +357,24 @@ function activateExtensionToggle(currentTab: chrome.tabs.Tab): void {
   });
 }
 
-// function enableTab(tabId: number): void {
-//   if (isEnabled) {
-//     if (!isActivated) {
-//       activateExtension(tabId, false);
-//     }
+function enableTabAndSendMessage(tabId: number): void {
+  chrome.storage.local.get(['enabled', 'activated'], (result) => {
+    const isActivated = result.activated === '1';
+    const isEnabled = result.enabled === '1';
 
-//     chrome.tabs.sendMessage(tabId, {
-//       type: 'enable',
-//       config: zhongwenOptions,
-//     });
-//   }
-// }
+    if (isEnabled) {
+      if (!isActivated) {
+        activateExtension(tabId, false);
+      }
+
+      chrome.tabs.sendMessage(tabId, {
+        type: 'enable',
+        // config: zhongwenOptions,
+        config: {},
+      });
+    }
+  });
+}
 
 // function search(text: string): any {
 //   if (!dict) {
@@ -396,26 +403,27 @@ function activateExtensionToggle(currentTab: chrome.tabs.Tab): void {
 
 chrome.action.onClicked.addListener(activateExtensionToggle);
 
-// chrome.tabs.onActivated.addListener((activeInfo) => {
-//   if (activeInfo.tabId !== undefined) {
-//     const tabId: number = activeInfo.tabId;
-//     if (tabId === tabIDs['wordlist']) {
-//       chrome.tabs.reload(tabId);
-//     } else if (tabId !== tabIDs['help']) {
-//       enableTab(tabId);
-//     }
-//   }
-// });
+chrome.tabs.onActivated.addListener((activeInfo) => {
+  if (activeInfo.tabId !== undefined) {
+    const tabId: number = activeInfo.tabId;
+    // if (tabId === tabIDs['wordlist']) {
+    //   chrome.tabs.reload(tabId);
+    // } else if (tabId !== tabIDs['help']) {
+    enableTabAndSendMessage(tabId);
+    // }
+  }
+});
 
-// chrome.tabs.onUpdated.addListener(function (tabId, changeInfo) {
-//   if (
-//     changeInfo.status === 'complete' &&
-//     tabId !== tabIDs['help'] &&
-//     tabId !== tabIDs['wordlist']
-//   ) {
-//     enableTab(tabId);
-//   }
-// });
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo) {
+  if (
+    changeInfo.status === 'complete'
+    // &&
+    // tabId !== tabIDs['help'] &&
+    // tabId !== tabIDs['wordlist']
+  ) {
+    enableTabAndSendMessage(tabId);
+  }
+});
 
 // function createTab(url: string, tabType: string): void {
 //   chrome.tabs.create({ url }, (tab) => {

@@ -469,26 +469,15 @@ function onMouseMove(mouseMove: MouseEvent): void {
   clientX = mouseMove.clientX;
   clientY = mouseMove.clientY;
 
-  let range: Range | CaretPosition | null;
   let rangeNode: Node | null = null;
   let rangeOffset = 0;
 
-  // Handle Chrome and Firefox
-  if (document.caretRangeFromPoint) {
-    range = document.caretRangeFromPoint(mouseMove.clientX, mouseMove.clientY);
-    if (range === null) {
-      return;
-    }
-    rangeNode = range.startContainer;
-    rangeOffset = range.startOffset;
-  } else if (document.caretPositionFromPoint) {
-    range = document.caretPositionFromPoint(mouseMove.clientX, mouseMove.clientY);
-    if (range === null) {
-      return;
-    }
-    rangeNode = range.offsetNode;
-    rangeOffset = range.offset;
+  const range = document.caretPositionFromPoint(mouseMove.clientX, mouseMove.clientY);
+  if (range === null) {
+    return;
   }
+  rangeNode = range.offsetNode;
+  rangeOffset = range.offset;
 
   if (mouseMove.target === savedTarget) {
     if (rangeNode === savedRangeNode && rangeOffset === savedRangeOffset) {
