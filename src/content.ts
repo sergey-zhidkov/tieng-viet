@@ -86,6 +86,8 @@ interface SearchResult {
 
 console.log('Zhongwen content script loaded', { window, document, d: 'HERE' });
 
+const mainDivId = 'tiengvietDiv';
+
 let config: ZhongwenConfig;
 
 let savedTarget: HTMLElement | null = null;
@@ -435,14 +437,13 @@ function onKeyDown(keyDown: KeyboardEvent): void {
 }
 
 function onMouseMove(mouseMove: MouseEvent): void {
-  console.log('onMouseMove', mouseMove);
   if (
     mouseMove.target instanceof HTMLElement &&
     (mouseMove.target.nodeName === 'TEXTAREA' ||
       mouseMove.target.nodeName === 'INPUT' ||
       mouseMove.target.nodeName === 'DIV')
   ) {
-    let div = document.getElementById('zhongwenDiv');
+    let div = document.getElementById(mainDivId);
 
     if (mouseMove.altKey) {
       if (
@@ -490,6 +491,7 @@ function onMouseMove(mouseMove: MouseEvent): void {
     timer = null;
   }
 
+  console.log('onMouseMove', { mouseMove, rangeNode, rangeOffset });
   if (
     rangeNode &&
     rangeNode.nodeType === Node.TEXT_NODE &&
@@ -539,6 +541,7 @@ function onMouseMove(mouseMove: MouseEvent): void {
 }
 
 function triggerSearch(): number {
+  console.log('triggerSearch');
   if (!savedRangeNode) {
     clearHighlight();
     hidePopup();
@@ -562,28 +565,29 @@ function triggerSearch(): number {
     return 2;
   }
 
-  let u = rangeNode.textContent.charCodeAt(selStartOffset);
+  // TODO: is Vietnamese character?
+  // let u = rangeNode.textContent.charCodeAt(selStartOffset);
+  // let isChineseCharacter =
+  //   !isNaN(u) &&
+  //   (u === 0x25cb ||
+  //     (0x3400 <= u && u <= 0x9fff) ||
+  //     (0xf900 <= u && u <= 0xfaff) ||
+  //     (0xff21 <= u && u <= 0xff3a) ||
+  //     (0xff41 <= u && u <= 0xff5a) ||
+  //     (0xd800 <= u && u <= 0xdfff));
 
-  let isChineseCharacter =
-    !isNaN(u) &&
-    (u === 0x25cb ||
-      (0x3400 <= u && u <= 0x9fff) ||
-      (0xf900 <= u && u <= 0xfaff) ||
-      (0xff21 <= u && u <= 0xff3a) ||
-      (0xff41 <= u && u <= 0xff5a) ||
-      (0xd800 <= u && u <= 0xdfff));
+  // if (!isChineseCharacter) {
+  //   clearHighlight();
+  //   hidePopup();
+  //   return 3;
+  // }
 
-  if (!isChineseCharacter) {
-    clearHighlight();
-    hidePopup();
-    return 3;
-  }
-
-  let selEndList: SelEndItem[] = [];
-  let originalText = getText(rangeNode, selStartOffset, selEndList, 30 /*maxlength*/);
+  const selEndList: SelEndItem[] = [];
+  const originalText = getText(rangeNode, selStartOffset, selEndList, 30 /*maxlength*/);
 
   // Workaround for Google Docs: remove zero-width non-joiner &zwnj;
-  let text = originalText.replace(zwnj, '');
+  const text = originalText.replace(zwnj, '');
+  console.log('triggerSearch', { text });
 
   savedSelStartOffset = selStartOffset;
   savedSelEndList = selEndList;
@@ -601,6 +605,7 @@ function triggerSearch(): number {
 }
 
 function processSearchResult(result: SearchResult | null): void {
+  console.log('processSearchResult', { result });
   let selStartOffset = savedSelStartOffset;
   let selEndList = savedSelEndList;
 
@@ -871,9 +876,9 @@ function getTextForClipboard(): string {
 }
 
 function makeDiv(input: HTMLElement): HTMLDivElement {
-  let div = document.createElement('div');
+  const div = document.createElement('div');
 
-  div.id = 'zhongwenDiv';
+  div.id = mainDivId;
 
   let text;
   if ('value' in input && typeof input.value === 'string') {
@@ -897,10 +902,11 @@ function makeDiv(input: HTMLElement): HTMLDivElement {
 }
 
 function findNextTextNode(root: Node, previous: Node): Node | null {
+  console.log('findNextTextNode', { root, previous });
   if (root === null) {
     return null;
   }
-  let nodeIterator = document.createNodeIterator(root, NodeFilter.SHOW_TEXT, null);
+  const nodeIterator = document.createNodeIterator(root, NodeFilter.SHOW_TEXT, null);
   let node = nodeIterator.nextNode();
   while (node !== previous) {
     node = nodeIterator.nextNode();
@@ -908,7 +914,7 @@ function findNextTextNode(root: Node, previous: Node): Node | null {
       return findNextTextNode(root.parentNode!, previous);
     }
   }
-  let result = nodeIterator.nextNode();
+  const result = nodeIterator.nextNode();
   if (result !== null) {
     return result;
   } else {
@@ -929,7 +935,7 @@ function findPreviousTextNode(root: Node, previous: Node): Node | null {
     }
   }
   nodeIterator.previousNode();
-  let result = nodeIterator.previousNode();
+  const result = nodeIterator.previousNode();
   if (result !== null) {
     return result;
   } else {
@@ -949,13 +955,15 @@ function copyToClipboard(data: string): void {
 function makeHtml(result: SearchResult, showToneColors: boolean): string {
   let entry;
   let html = '';
-  let texts: Array<Array<string>> & {
+  const texts: Array<Array<string>> & {
     grammar?: { keyword: string; index: number };
     vocab?: { keyword: string; index: number };
   } = [];
   let hanziClass;
 
-  if (result === null) return '';
+  if (result === null) {
+    return '';
+  }
 
   for (let i = 0; i < result.data.length; ++i) {
     entry = result.data[i][0].match(/^([^\s]+?)\s+([^\s]+?)\s+\[(.*?)\]?\s*\/(.+)\//);

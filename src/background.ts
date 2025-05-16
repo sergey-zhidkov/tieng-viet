@@ -196,6 +196,27 @@ console.log('Zhongwen extension loaded', {});
 //   toneColorScheme: localStorage['toneColorScheme'] || 'standard',
 // });
 
+function sendTabMessage(tabId: number): void {
+  const localStorage = {} as Record<string, string>;
+  // TODO: save in a DB
+  const zhongwenOptions = {
+    css: localStorage['popupcolor'] || 'yellow',
+    tonecolors: localStorage['tonecolors'] || 'yes',
+    fontSize: localStorage['fontSize'] || 'small',
+    skritterTLD: localStorage['skritterTLD'] || 'com',
+    zhuyin: localStorage['zhuyin'] || 'no',
+    grammar: localStorage['grammar'] || 'yes',
+    vocab: localStorage['vocab'] || 'yes',
+    simpTrad: localStorage['simpTrad'] || 'classic',
+    toneColorScheme: localStorage['toneColorScheme'] || 'standard',
+  };
+
+  chrome.tabs.sendMessage(tabId, {
+    type: 'enable',
+    config: zhongwenOptions,
+  });
+}
+
 function activateExtension(tabId: number, showHelp: boolean): void {
   console.log('Activating extension', { tabId, showHelp });
   chrome.storage.local.set({ enabled: '1' });
@@ -210,12 +231,7 @@ function activateExtension(tabId: number, showHelp: boolean): void {
   // if (!dict) {
   //   loadDictionary().then((r) => (dict = r));
   // }
-
-  chrome.tabs.sendMessage(tabId, {
-    type: 'enable',
-    // config: zhongwenOptions,
-    config: {},
-  });
+  sendTabMessage(tabId);
 
   // if (showHelp) {
   //   chrome.tabs.sendMessage(tabId, {
@@ -366,12 +382,7 @@ function enableTabAndSendMessage(tabId: number): void {
       if (!isActivated) {
         activateExtension(tabId, false);
       }
-
-      chrome.tabs.sendMessage(tabId, {
-        type: 'enable',
-        // config: zhongwenOptions,
-        config: {},
-      });
+      sendTabMessage(tabId);
     }
   });
 }
