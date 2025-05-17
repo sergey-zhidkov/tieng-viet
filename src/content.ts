@@ -615,7 +615,6 @@ function processSearchResult(result: SearchResult | null): void {
     return;
   }
 
-  let highlightLength;
   let index = 0;
   for (let i = 0; i < result.matchLen; i++) {
     // Google Docs workaround: determine the correct highlight length
@@ -624,15 +623,15 @@ function processSearchResult(result: SearchResult | null): void {
     }
     index++;
   }
-  highlightLength = index;
+  const highlightLength = index;
 
   selStartIncrement = result.matchLen;
   selStartDelta = selStartOffset - savedRangeOffset;
 
-  let rangeNode = savedRangeNode;
+  const rangeNode = savedRangeNode;
   // don't try to highlight form elements
   if (rangeNode && savedTarget && !('form' in savedTarget)) {
-    let doc = rangeNode.ownerDocument;
+    const doc = rangeNode.ownerDocument;
     if (!doc) {
       clearHighlight();
       hidePopup();
@@ -953,6 +952,7 @@ function copyToClipboard(data: string): void {
 }
 
 function makeHtml(result: SearchResult, showToneColors: boolean): string {
+  console.log('makeHtml', { result, showToneColors });
   let entry;
   let html = '';
   const texts: Array<Array<string>> & {
@@ -966,44 +966,34 @@ function makeHtml(result: SearchResult, showToneColors: boolean): string {
   }
 
   for (let i = 0; i < result.data.length; ++i) {
-    entry = result.data[i][0].match(/^([^\s]+?)\s+([^\s]+?)\s+\[(.*?)\]?\s*\/(.+)\//);
-    if (!entry) continue;
+    // entry = result.data[i][0].match(/^([^\s]+?)\s+([^\s]+?)\s+\[(.*?)\]?\s*\/(.+)\//);
+    // if (!entry) continue;
 
     // Hanzi
 
-    if (config.simpTrad === 'auto') {
-      let word = result.data[i][1];
-
-      hanziClass = 'w-hanzi';
-      if (config.fontSize === 'small') {
-        hanziClass += '-small';
-      }
-      html += '<span class="' + hanziClass + '">' + word + '</span>&nbsp;';
-    } else {
-      hanziClass = 'w-hanzi';
-      if (config.fontSize === 'small') {
-        hanziClass += '-small';
-      }
-      html += '<span class="' + hanziClass + '">' + entry[2] + '</span>&nbsp;';
-      if (entry[1] !== entry[2]) {
-        html += '<span class="' + hanziClass + '">' + entry[1] + '</span>&nbsp;';
-      }
+    hanziClass = 'w-hanzi';
+    if (config.fontSize === 'small') {
+      hanziClass += '-small';
     }
+    html += '<span class="' + hanziClass + '">' + result.data[i][0] + '</span>&nbsp;';
+    // if (entry[1] !== entry[2]) {
+    //   html += '<span class="' + hanziClass + '">' + entry[1] + '</span>&nbsp;';
+    // }
 
     // Pinyin
 
-    let pinyinClass = 'w-pinyin';
-    if (config.fontSize === 'small') {
-      pinyinClass += '-small';
-    }
-    let p = pinyinAndZhuyin(entry[3], showToneColors, pinyinClass);
-    html += p[0];
+    // let pinyinClass = 'w-pinyin';
+    // if (config.fontSize === 'small') {
+    //   pinyinClass += '-small';
+    // }
+    // let p = pinyinAndZhuyin(entry[3], showToneColors, pinyinClass);
+    // html += p[0];
 
-    // Zhuyin
+    // // Zhuyin
 
-    if (config.zhuyin === 'yes') {
-      html += '<br>' + p[2];
-    }
+    // if (config.zhuyin === 'yes') {
+    //   html += '<br>' + p[2];
+    // }
 
     // Definition
 
@@ -1011,28 +1001,29 @@ function makeHtml(result: SearchResult, showToneColors: boolean): string {
     if (config.fontSize === 'small') {
       defClass += '-small';
     }
-    let translation = entry[4].replace(/\//g, ' ◆ ');
-    html += '<br><span class="' + defClass + '">' + translation + '</span><br>';
+    // let translation = entry[4].replace(/\//g, ' ◆ ');
+    html +=
+      '<br><span class="' + defClass + '">' + result.data[i][0].split(' : ')[1] + '</span><br>';
 
     let addFinalBr = false;
 
-    // Grammar
-    if (config.grammar !== 'no' && result.grammar && result.grammar.index === i) {
-      html += '<br><span class="grammar">Press "g" for grammar and usage notes.</span><br>';
-      addFinalBr = true;
-    }
+    // // Grammar
+    // if (config.grammar !== 'no' && result.grammar && result.grammar.index === i) {
+    //   html += '<br><span class="grammar">Press "g" for grammar and usage notes.</span><br>';
+    //   addFinalBr = true;
+    // }
 
     // Vocab
-    if (config.vocab !== 'no' && result.vocab && result.vocab.index === i) {
-      html += '<br><span class="vocab">Press "v" for vocabulary notes.</span><br>';
-      addFinalBr = true;
-    }
+    // if (config.vocab !== 'no' && result.vocab && result.vocab.index === i) {
+    //   html += '<br><span class="vocab">Press "v" for vocabulary notes.</span><br>';
+    //   addFinalBr = true;
+    // }
 
     if (addFinalBr) {
       html += '<br>';
     }
 
-    texts[i] = [entry[2], entry[1], p[1], translation, entry[3]];
+    // texts[i] = [entry[2], entry[1], p[1], translation, entry[3]];
   }
   if (result.more) {
     html += '&hellip;<br/>';
@@ -1042,10 +1033,12 @@ function makeHtml(result: SearchResult, showToneColors: boolean): string {
   savedSearchResults.grammar = result.grammar;
   savedSearchResults.vocab = result.vocab;
 
+  console.log({ html });
+
   return html;
 }
 
-let tones: Record<number, string> = {
+const tones: Record<number, string> = {
   1: '&#772;',
   2: '&#769;',
   3: '&#780;',
@@ -1053,7 +1046,7 @@ let tones: Record<number, string> = {
   5: '',
 };
 
-let utones: Record<number, string> = {
+const utones: Record<number, string> = {
   1: '\u0304',
   2: '\u0301',
   3: '\u030C',
