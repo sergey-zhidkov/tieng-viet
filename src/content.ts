@@ -606,8 +606,8 @@ function triggerSearch(): number {
 
 function processSearchResult(result: SearchResult | null): void {
   console.log('processSearchResult', { result });
-  let selStartOffset = savedSelStartOffset;
-  let selEndList = savedSelEndList;
+  const selStartOffset = savedSelStartOffset;
+  const selEndList = savedSelEndList;
 
   if (!result) {
     hidePopup();

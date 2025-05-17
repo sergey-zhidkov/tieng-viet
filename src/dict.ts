@@ -44,7 +44,7 @@
 
  */
 
-'use strict';
+// 'use strict';
 
 // import { IDictionaryEntry } from './types';
 

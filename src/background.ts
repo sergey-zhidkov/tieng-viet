@@ -387,30 +387,27 @@ function enableTabAndSendMessage(tabId: number): void {
   });
 }
 
-// function search(text: string): any {
-//   if (!dict) {
-//     // dictionary not loaded
-//     return;
-//   }
-
-//   let entry = dict.wordSearch(text);
-
-//   if (entry) {
-//     for (let i = 0; i < entry.data.length; i++) {
-//       let word = entry.data[i][1];
-//       if (dict.hasGrammarKeyword(word) && entry.matchLen === word.length) {
-//         // the final index should be the last one with the maximum length
-//         entry.grammar = { keyword: word, index: i };
-//       }
-//       if (dict.hasVocabKeyword(word) && entry.matchLen === word.length) {
-//         // the final index should be the last one with the maximum length
-//         entry.vocab = { keyword: word, index: i };
-//       }
-//     }
-//   }
-
-//   return entry;
-// }
+function search(text: string): any {
+  // if (!dict) {
+  //   // dictionary not loaded
+  //   return;
+  // }
+  // let entry = dict.wordSearch(text);
+  // if (entry) {
+  //   for (let i = 0; i < entry.data.length; i++) {
+  //     let word = entry.data[i][1];
+  //     // if (dict.hasGrammarKeyword(word) && entry.matchLen === word.length) {
+  //     //   // the final index should be the last one with the maximum length
+  //     //   entry.grammar = { keyword: word, index: i };
+  //     // }
+  //     // if (dict.hasVocabKeyword(word) && entry.matchLen === word.length) {
+  //     //   // the final index should be the last one with the maximum length
+  //     //   entry.vocab = { keyword: word, index: i };
+  //     // }
+  //   }
+  // }
+  // return entry;
+}
 
 chrome.action.onClicked.addListener(activateExtensionToggle);
 
@@ -446,18 +443,30 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo) {
 
 chrome.runtime.onMessage.addListener((request: MessageRequest, sender, callback) => {
   console.log('Received message:', { request, sender });
-  callback({ resp: 'ping' });
+  // callback({ resp: 'ping' });
   let tabID: number | undefined;
 
-  ensureDictLoaded().then((dictText) => {
-    console.log('Search results:', { dictText });
-    const results = searchDictionary(dictText as string, (request as { text: string })?.text);
-    callback({ results });
-  });
+  // ensureDictLoaded().then((dictText) => {
+  //   console.log('Search results:', { dictText });
+  //   const results = searchDictionary(dictText as string, (request as { text: string })?.text);
+  //   callback({ results });
+  // });
 
   switch (request.type) {
     case 'search':
       {
+        ensureDictLoaded().then((dictText) => {
+          const response = searchDictionary(
+            dictText as string,
+            (request as { text: string })?.text,
+          );
+          console.log('Search results:', { results: response });
+          if (response) {
+            response.originalText = request.originalText;
+          }
+          callback(response);
+        });
+
         // let response = search(request.text);
         // if (response) {
         //   response.originalText = request.originalText;
@@ -559,7 +568,7 @@ let db: IDBDatabase;
 
 function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('ZhongwenDB', 1);
+    const request = indexedDB.open('TiengvietDB', 1);
 
     request.onupgradeneeded = (event) => {
       db = request.result;
@@ -609,6 +618,118 @@ async function ensureDictLoaded() {
 }
 
 function searchDictionary(dictText: string, query: string) {
+  const entry: IDictionaryEntry = { data: [], matchLen: 0 };
   const lines: string[] = dictText.split('\n');
-  return lines.filter((line) => line.includes(query)).slice(0, 10); // example: return top 10 matches
+  query = 'lâu lắm rồi' + ' :';
+  console.log({ query, lines });
+  const dentry = lines.find((line) => line.startsWith(query));
+  if (dentry) {
+    entry.data.push([dentry, query]);
+  }
+  entry.matchLen = query.length;
+  return entry;
+}
+
+// class ZhongwenDictionary {
+//   private wordDict: string;
+//   // private wordIndex: string;
+//   private cache: Record<string, Array<string>>;
+
+//   constructor(wordDict: string) {
+//     this.wordDict = wordDict;
+//     // this.wordIndex = wordIndex;
+//     this.cache = {};
+//   }
+
+//   static find(needle: string, haystack: string): string | null {
+//     let beg = 0;
+//     let end = haystack.length - 1;
+
+//     while (beg < end) {
+//       const mi = Math.floor((beg + end) / 2);
+//       const i = haystack.lastIndexOf('\n', mi) + 1;
+
+//       const mis = haystack.substr(i, needle.length);
+//       if (needle < mis) {
+//         end = i - 1;
+//       } else if (needle > mis) {
+//         beg = haystack.indexOf('\n', mi + 1) + 1;
+//       } else {
+//         return haystack.substring(i, haystack.indexOf('\n', mi + 1));
+//       }
+//     }
+
+//     return null;
+//   }
+
+//   wordSearch(word: string, max?: number): IDictionaryEntry | null {
+//     const entry: IDictionaryEntry = { data: [], matchLen: 0 };
+
+//     const dict = this.wordDict;
+//     // const index = this.wordIndex;
+
+//     const maxTrim = max || 7;
+
+//     let count = 0;
+//     let maxLen = 0;
+
+//     WHILE: while (word.length > 0) {
+//       let ix = this.cache[word];
+//       if (!ix) {
+//         const result = ZhongwenDictionary.find(word + ',', 'index');
+//         if (!result) {
+//           this.cache[word] = [];
+//           word = word.substr(0, word.length - 1);
+//           continue;
+//         }
+//         ix = result.split(','); // ix === ['word', '70002']
+//         this.cache[word] = ix;
+//       }
+
+//       for (let j = 1; j < ix.length; ++j) {
+//         const offset = parseInt(ix[j], 10);
+
+//         const dentry = dict.substring(offset, dict.indexOf('\n', offset));
+
+//         if (count >= maxTrim) {
+//           entry.more = 1;
+//           break WHILE;
+//         }
+
+//         ++count;
+//         if (maxLen === 0) {
+//           maxLen = word.length;
+//         }
+
+//         entry.data.push([dentry, word]);
+//       }
+
+//       word = word.substr(0, word.length - 1);
+//     }
+
+//     if (entry.data.length === 0) {
+//       return null;
+//     }
+
+//     entry.matchLen = maxLen;
+//     return entry;
+//   }
+// }
+
+/**
+ * Dictionary entry interface
+ */
+interface IDictionaryEntry {
+  data: Array<[string, string]>;
+  matchLen: number;
+  more?: number;
+  grammar?: {
+    keyword: string;
+    index: number;
+  };
+  vocab?: {
+    keyword: string;
+    index: number;
+  };
+  originalText?: string;
 }
