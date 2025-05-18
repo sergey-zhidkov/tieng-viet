@@ -87,6 +87,7 @@ interface SearchResult {
 console.log('Zhongwen content script loaded', { window, document, d: 'HERE' });
 
 const mainDivId = 'tiengvietDiv';
+const tiengvietWindowId = 'tiengviet-window';
 
 let config: ZhongwenConfig;
 
@@ -135,7 +136,7 @@ function disableTab(): void {
   document.removeEventListener('mousemove', onMouseMove);
   document.removeEventListener('keydown', onKeyDown);
 
-  let popup = document.getElementById('zhongwen-window');
+  const popup = document.getElementById(tiengvietWindowId);
   if (popup) {
     popup.parentNode?.removeChild(popup);
   }
@@ -491,7 +492,7 @@ function onMouseMove(mouseMove: MouseEvent): void {
     timer = null;
   }
 
-  console.log('onMouseMove', { mouseMove, rangeNode, rangeOffset });
+  console.log('onMouseMove', { rangeNode, rangeOffset });
   if (
     rangeNode &&
     rangeNode.nodeType === Node.TEXT_NODE &&
@@ -531,9 +532,9 @@ function onMouseMove(mouseMove: MouseEvent): void {
   }
 
   // Don't close just because we moved from a valid pop-up slightly over to a place with nothing.
-  let dx = popX - mouseMove.clientX;
-  let dy = popY - mouseMove.clientY;
-  let distance = Math.sqrt(dx * dx + dy * dy);
+  const dx = popX - mouseMove.clientX;
+  const dy = popY - mouseMove.clientY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
   if (distance > 4) {
     clearHighlight();
     hidePopup();
@@ -541,15 +542,14 @@ function onMouseMove(mouseMove: MouseEvent): void {
 }
 
 function triggerSearch(): number {
-  console.log('triggerSearch');
   if (!savedRangeNode) {
     clearHighlight();
     hidePopup();
     return 1;
   }
 
-  let rangeNode = savedRangeNode;
-  let selStartOffset = savedRangeOffset + selStartDelta;
+  const rangeNode = savedRangeNode;
+  const selStartOffset = savedRangeOffset + selStartDelta;
 
   selStartIncrement = 1;
 
@@ -583,7 +583,7 @@ function triggerSearch(): number {
   // }
 
   const selEndList: SelEndItem[] = [];
-  const originalText = getText(rangeNode, selStartOffset, selEndList, 30 /*maxlength*/);
+  const originalText = getText(rangeNode, selStartOffset, selEndList, 90 /*maxlength*/);
 
   // Workaround for Google Docs: remove zero-width non-joiner &zwnj;
   const text = originalText.replace(zwnj, '');
@@ -704,11 +704,11 @@ function showPopup(
     x = y = 0;
   }
 
-  let popup = document.getElementById('zhongwen-window');
+  let popup = document.getElementById(tiengvietWindowId);
 
   if (!popup) {
     popup = document.createElement('div');
-    popup.setAttribute('id', 'zhongwen-window');
+    popup.setAttribute('id', tiengvietWindowId);
     document.documentElement.appendChild(popup);
   }
 
@@ -810,7 +810,7 @@ function showPopup(
 }
 
 function hidePopup(): void {
-  let popup = document.getElementById('zhongwen-window');
+  const popup = document.getElementById(tiengvietWindowId);
   if (popup) {
     popup.style.display = 'none';
     popup.textContent = '';
@@ -853,7 +853,7 @@ function clearHighlight(): void {
     return;
   }
 
-  let selection = window.getSelection();
+  const selection = window.getSelection();
   if (selection && (selection.isCollapsed || selText === selection.toString())) {
     selection.empty();
   }
@@ -861,7 +861,7 @@ function clearHighlight(): void {
 }
 
 function isVisible(): boolean {
-  let popup = document.getElementById('zhongwen-window');
+  let popup = document.getElementById(tiengvietWindowId);
   return popup !== null && popup.style.display !== 'none';
 }
 
@@ -901,7 +901,6 @@ function makeDiv(input: HTMLElement): HTMLDivElement {
 }
 
 function findNextTextNode(root: Node, previous: Node): Node | null {
-  console.log('findNextTextNode', { root, previous });
   if (root === null) {
     return null;
   }
@@ -925,7 +924,7 @@ function findPreviousTextNode(root: Node, previous: Node): Node | null {
   if (root === null) {
     return null;
   }
-  let nodeIterator = document.createNodeIterator(root, NodeFilter.SHOW_TEXT, null);
+  const nodeIterator = document.createNodeIterator(root, NodeFilter.SHOW_TEXT, null);
   let node = nodeIterator.nextNode();
   while (node !== previous) {
     node = nodeIterator.nextNode();
@@ -953,7 +952,6 @@ function copyToClipboard(data: string): void {
 
 function makeHtml(result: SearchResult, showToneColors: boolean): string {
   console.log('makeHtml', { result, showToneColors });
-  let entry;
   let html = '';
   const texts: Array<Array<string>> & {
     grammar?: { keyword: string; index: number };

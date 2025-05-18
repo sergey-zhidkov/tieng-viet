@@ -387,27 +387,27 @@ function enableTabAndSendMessage(tabId: number): void {
   });
 }
 
-function search(text: string): any {
-  // if (!dict) {
-  //   // dictionary not loaded
-  //   return;
-  // }
-  // let entry = dict.wordSearch(text);
-  // if (entry) {
-  //   for (let i = 0; i < entry.data.length; i++) {
-  //     let word = entry.data[i][1];
-  //     // if (dict.hasGrammarKeyword(word) && entry.matchLen === word.length) {
-  //     //   // the final index should be the last one with the maximum length
-  //     //   entry.grammar = { keyword: word, index: i };
-  //     // }
-  //     // if (dict.hasVocabKeyword(word) && entry.matchLen === word.length) {
-  //     //   // the final index should be the last one with the maximum length
-  //     //   entry.vocab = { keyword: word, index: i };
-  //     // }
-  //   }
-  // }
-  // return entry;
-}
+// function search(text: string): any {
+//   // if (!dict) {
+//   //   // dictionary not loaded
+//   //   return;
+//   // }
+//   // let entry = dict.wordSearch(text);
+//   // if (entry) {
+//   //   for (let i = 0; i < entry.data.length; i++) {
+//   //     let word = entry.data[i][1];
+//   //     // if (dict.hasGrammarKeyword(word) && entry.matchLen === word.length) {
+//   //     //   // the final index should be the last one with the maximum length
+//   //     //   entry.grammar = { keyword: word, index: i };
+//   //     // }
+//   //     // if (dict.hasVocabKeyword(word) && entry.matchLen === word.length) {
+//   //     //   // the final index should be the last one with the maximum length
+//   //     //   entry.vocab = { keyword: word, index: i };
+//   //     // }
+//   //   }
+//   // }
+//   // return entry;
+// }
 
 chrome.action.onClicked.addListener(activateExtensionToggle);
 
@@ -445,12 +445,6 @@ chrome.runtime.onMessage.addListener((request: MessageRequest, sender, callback)
   console.log('Received message:', { request, sender });
   // callback({ resp: 'ping' });
   let tabID: number | undefined;
-
-  // ensureDictLoaded().then((dictText) => {
-  //   console.log('Search results:', { dictText });
-  //   const results = searchDictionary(dictText as string, (request as { text: string })?.text);
-  //   callback({ results });
-  // });
 
   switch (request.type) {
     case 'search':
@@ -541,29 +535,6 @@ chrome.runtime.onMessage.addListener((request: MessageRequest, sender, callback)
   return true;
 });
 
-// chrome.runtime.onInstalled.addListener(() => {
-//   console.log('Extension installed');
-// });
-
-// 2. Extension icon clicked
-// chrome.action.onClicked.addListener((tab) => {
-//   console.log('Extension icon clicked');
-// });
-
-// chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-//   if (changeInfo.status === 'complete') {
-//     console.log('Tab finished loading:', tab.url);
-//   }
-// });
-
-// chrome.alarms.onAlarm.addListener((alarm) => {
-//   console.log('Alarm triggered:', alarm.name);
-// });
-
-// chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-//   sendResponse({ pong: true });
-// });
-
 let db: IDBDatabase;
 
 function openDatabase(): Promise<IDBDatabase> {
@@ -620,13 +591,37 @@ async function ensureDictLoaded() {
 function searchDictionary(dictText: string, query: string) {
   const entry: IDictionaryEntry = { data: [], matchLen: 0 };
   const lines: string[] = dictText.split('\n');
-  query = 'lâu lắm rồi' + ' :';
-  console.log({ query, lines });
-  const dentry = lines.find((line) => line.startsWith(query));
-  if (dentry) {
-    entry.data.push([dentry, query]);
+  // let maxWords = 0;
+  // for (const line of lines) {
+  //   const [words] = line.split(' : ');
+  //   const numOfWords = words.split(' ').length;
+  //   if (numOfWords > maxWords) {
+  //     maxWords = numOfWords;
+  //     console.log('New max words in a line:', maxWords, { line, numOfWords });
+  //   }
+  // }
+
+  // console.log('Max words in a line:', maxWords);
+
+  // query = 'lâu lắm rồi' + ' :';
+  console.log({ query });
+  // TODO: replace all spaces with a single space
+  const words = query.split(' ');
+  let maxLen = 0;
+  while (words.length > 0) {
+    const nextWordToSearch = words.join(' ') + ' :';
+    const dentry = lines.find((line) => line.startsWith(nextWordToSearch));
+    if (dentry) {
+      if (maxLen < nextWordToSearch.length) {
+        maxLen = nextWordToSearch.length;
+      }
+      entry.data.push([dentry, nextWordToSearch]);
+    }
+    console.log('Searching for:', nextWordToSearch, { dentry });
+    words.pop();
   }
-  entry.matchLen = query.length;
+
+  entry.matchLen = maxLen;
   return entry;
 }
 
