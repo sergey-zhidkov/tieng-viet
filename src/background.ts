@@ -592,34 +592,43 @@ function searchDictionary(dictText: string, query: string) {
   const entry: IDictionaryEntry = { data: [], matchLen: 0 };
   const lines: string[] = dictText.split('\n');
   query = query.toLocaleLowerCase();
-  // let maxWords = 0;
-  // for (const line of lines) {
-  //   const [words] = line.split(' : ');
-  //   const numOfWords = words.split(' ').length;
-  //   if (numOfWords > maxWords) {
-  //     maxWords = numOfWords;
-  //     console.log('New max words in a line:', maxWords, { line, numOfWords });
-  //   }
-  // }
 
-  // console.log('Max words in a line:', maxWords);
-
-  // query = 'lâu lắm rồi' + ' :';
   console.log({ query });
-  // TODO: replace all spaces with a single space
-  const words = query.split(' ');
+
+  let currentQuery = query;
   let maxLen = 0;
-  while (words.length > 0) {
-    const nextWordToSearch = words.join(' ') + ' :';
-    const dentry = lines.find((line) => line.startsWith(nextWordToSearch));
+
+  while (currentQuery.length > 0) {
+    const nextWordToSearch = currentQuery + ' :';
+    const dentry = lines.find((line) => line.toLocaleLowerCase().startsWith(nextWordToSearch));
+
     if (dentry) {
       if (maxLen < nextWordToSearch.length) {
         maxLen = nextWordToSearch.length - 2; // remove the ' :'
       }
       entry.data.push([dentry, nextWordToSearch]);
     }
+
     console.log('Searching for:', nextWordToSearch, { dentry });
-    words.pop();
+
+    // Check if the rightmost character is an alphabet character
+    if (currentQuery.length > 0) {
+      const lastChar = currentQuery.charAt(currentQuery.length - 1);
+      const isAlphabet = /\p{L}/u.test(lastChar);
+
+      if (isAlphabet) {
+        // If it's an alphabet character, remove all characters until we meet non-alphabet characters
+        let i = currentQuery.length - 1;
+        while (i >= 0 && /\p{L}/u.test(currentQuery.charAt(i))) {
+          i--;
+        }
+        currentQuery = currentQuery.substring(0, i + 1);
+      } else {
+        // If it's not an alphabet character, remove just one character
+        currentQuery = currentQuery.substring(0, currentQuery.length - 1);
+      }
+    }
+    currentQuery = currentQuery.trimEnd();
   }
 
   entry.matchLen = maxLen;
