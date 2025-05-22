@@ -124,6 +124,9 @@ let savedSelStartOffset = 0;
 
 let savedSelEndList: SelEndItem[] = [];
 
+// Global variable to store the offset difference when finding word boundaries
+let wordBoundaryOffsetDiff = 0;
+
 // regular expression for zero-width non-joiner U+200C &zwnj;
 const zwnj = /\u200c/g;
 
@@ -492,7 +495,6 @@ function onMouseMove(mouseMove: MouseEvent): void {
     timer = null;
   }
 
-  console.log('onMouseMove', { rangeNode, rangeOffset });
   if (
     rangeNode &&
     rangeNode.nodeType === Node.TEXT_NODE &&
@@ -624,6 +626,8 @@ function processSearchResult(result: SearchResult | null): void {
     }
     index++;
   }
+
+  console.log('>>> highlight', { index, matchLen: result.matchLen, selEndList });
   const highlightLength = index;
 
   selStartIncrement = result.matchLen;
@@ -676,6 +680,9 @@ function getText(
       }
     }
   }
+
+  // Update the wordBoundaryOffsetDiff with the difference between original and adjusted offset
+  wordBoundaryOffsetDiff = originalOffset - offset;
 
   const endIndex = Math.min(startNode.textContent.length, originalOffset + maxLength);
   text += startNode.textContent.substring(offset, endIndex);
@@ -844,10 +851,18 @@ function highlightMatch(
   matchLen: number,
   selEndList: SelEndItem[],
 ): void {
-  if (!selEndList || selEndList.length === 0) return;
+  if (!selEndList || selEndList.length === 0) {
+    return;
+  }
+
+  // Apply the same offset adjustment that was used in getText
+  // This ensures we highlight the same text that was searched
+  const adjustedRangeStartOffset = rangeStartOffset - wordBoundaryOffsetDiff;
 
   let selEnd;
-  let offset = rangeStartOffset + matchLen;
+  let offset = adjustedRangeStartOffset + matchLen;
+
+  console.log('highlightMatch', { adjustedRangeStartOffset, offset });
 
   for (let i = 0, len = selEndList.length; i < len; i++) {
     selEnd = selEndList[i];
@@ -856,13 +871,16 @@ function highlightMatch(
     }
     offset -= selEnd.offset;
   }
+  console.log('highlightMatch after', { offset });
 
   const range = doc.createRange();
-  range.setStart(rangeStartNode, rangeStartOffset);
+  range.setStart(rangeStartNode, adjustedRangeStartOffset);
   range.setEnd(selEnd.node, offset);
 
   const sel = window.getSelection();
-  if (sel && !sel.isCollapsed && selText !== sel.toString()) return;
+  if (sel && !sel.isCollapsed && selText !== sel.toString()) {
+    return;
+  }
   sel?.empty();
   sel?.addRange(range);
   selText = sel?.toString() || null;
