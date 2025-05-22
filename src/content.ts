@@ -125,7 +125,7 @@ let savedSelStartOffset = 0;
 let savedSelEndList: SelEndItem[] = [];
 
 // regular expression for zero-width non-joiner U+200C &zwnj;
-let zwnj = /\u200c/g;
+const zwnj = /\u200c/g;
 
 function enableTab(): void {
   document.addEventListener('mousemove', onMouseMove);
@@ -552,6 +552,7 @@ function triggerSearch(): number {
   const selStartOffset = savedRangeOffset + selStartDelta;
 
   selStartIncrement = 1;
+  console.log('triggerSearch', { rangeNode, selStartOffset });
 
   if (rangeNode.nodeType !== Node.TEXT_NODE || !rangeNode.textContent) {
     clearHighlight();
@@ -609,7 +610,7 @@ function processSearchResult(result: SearchResult | null): void {
   const selStartOffset = savedSelStartOffset;
   const selEndList = savedSelEndList;
 
-  if (!result) {
+  if (!result || !result.data?.length) {
     hidePopup();
     clearHighlight();
     return;
@@ -651,13 +652,12 @@ function getText(
   maxLength: number,
 ): string {
   let text = '';
-  let endIndex;
 
   if (startNode.nodeType !== Node.TEXT_NODE || !startNode.textContent) {
     return '';
   }
 
-  endIndex = Math.min(startNode.textContent.length, offset + maxLength);
+  const endIndex = Math.min(startNode.textContent.length, offset + maxLength);
   text += startNode.textContent.substring(offset, endIndex);
   selEndList.push({
     node: startNode,
@@ -837,11 +837,11 @@ function highlightMatch(
     offset -= selEnd.offset;
   }
 
-  let range = doc.createRange();
+  const range = doc.createRange();
   range.setStart(rangeStartNode, rangeStartOffset);
   range.setEnd(selEnd.node, offset);
 
-  let sel = window.getSelection();
+  const sel = window.getSelection();
   if (sel && !sel.isCollapsed && selText !== sel.toString()) return;
   sel?.empty();
   sel?.addRange(range);
@@ -900,7 +900,7 @@ function makeDiv(input: HTMLElement): HTMLDivElement {
   return div;
 }
 
-function findNextTextNode(root: Node, previous: Node): Node | null {
+function findNextTextNode(root: Node | null, previous: Node): Node | null {
   if (root === null) {
     return null;
   }
@@ -916,11 +916,11 @@ function findNextTextNode(root: Node, previous: Node): Node | null {
   if (result !== null) {
     return result;
   } else {
-    return findNextTextNode(root.parentNode!, previous);
+    return findNextTextNode(root.parentNode, previous);
   }
 }
 
-function findPreviousTextNode(root: Node, previous: Node): Node | null {
+function findPreviousTextNode(root: Node | null, previous: Node): Node | null {
   if (root === null) {
     return null;
   }
@@ -929,7 +929,7 @@ function findPreviousTextNode(root: Node, previous: Node): Node | null {
   while (node !== previous) {
     node = nodeIterator.nextNode();
     if (node === null) {
-      return findPreviousTextNode(root.parentNode!, previous);
+      return findPreviousTextNode(root.parentNode, previous);
     }
   }
   nodeIterator.previousNode();

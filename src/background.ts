@@ -591,6 +591,7 @@ async function ensureDictLoaded() {
 function searchDictionary(dictText: string, query: string) {
   const entry: IDictionaryEntry = { data: [], matchLen: 0 };
   const lines: string[] = dictText.split('\n');
+  query = query.toLocaleLowerCase();
   // let maxWords = 0;
   // for (const line of lines) {
   //   const [words] = line.split(' : ');
@@ -613,7 +614,7 @@ function searchDictionary(dictText: string, query: string) {
     const dentry = lines.find((line) => line.startsWith(nextWordToSearch));
     if (dentry) {
       if (maxLen < nextWordToSearch.length) {
-        maxLen = nextWordToSearch.length;
+        maxLen = nextWordToSearch.length - 2; // remove the ' :'
       }
       entry.data.push([dentry, nextWordToSearch]);
     }
