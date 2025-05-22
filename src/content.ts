@@ -657,7 +657,27 @@ function getText(
     return '';
   }
 
-  const endIndex = Math.min(startNode.textContent.length, offset + maxLength);
+  // Move offset to the beginning of the word if not already there
+  const originalOffset = offset;
+  if (offset > 0 && startNode.textContent) {
+    // Check if we're already at the beginning of a word
+    const isWordBoundary = (char: string) => /\s|[.,;:!?()[\]{}'"<>]/.test(char);
+    const prevChar = startNode.textContent[offset - 1];
+
+    // If the previous character is not a word boundary, we're in the middle of a word
+    if (!isWordBoundary(prevChar)) {
+      // Move backward until we find a word boundary or reach the beginning of the text
+      while (offset > 0) {
+        const char = startNode.textContent[offset - 1];
+        if (isWordBoundary(char)) {
+          break;
+        }
+        offset--;
+      }
+    }
+  }
+
+  const endIndex = Math.min(startNode.textContent.length, originalOffset + maxLength);
   text += startNode.textContent.substring(offset, endIndex);
   selEndList.push({
     node: startNode,
