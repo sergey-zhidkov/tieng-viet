@@ -165,6 +165,7 @@
   color: #20a020;
 }
 
+/* TODO: remove */
 #tiengviet-window.background-black .grammar {
   color: #add8e6;
 }
@@ -174,28 +175,43 @@
 }
 
 /* Standard Tone Colors */
+/* Sắc (high-rising) */
 #tiengviet-window.tonecolor-standard .tone1 {
   color: #ee363e;
 }
 
+/* Huyền (low-falling) */
 #tiengviet-window.tonecolor-standard .tone2 {
-  color: #f47c36;
-}
-
-#tiengviet-window.tonecolor-standard .tone3 {
-  color: #73bb4f;
-}
-
-#tiengviet-window.tonecolor-standard .tone4 {
+  /* color: #f47c36; */
   color: #649cd3;
 }
 
+/* Hỏi (dipping-rising) - orange or purple */
+#tiengviet-window.tonecolor-standard .tone3 {
+  /* color: #73bb4f; */
+  color: #f47c36;
+}
+
+/* Ngã (creaky rising) */
+#tiengviet-window.tonecolor-standard .tone4 {
+  /* color: #649cd3; */
+  color: #73bb4f;
+}
+
+/* Nặng (heavy, falling) - Brown or Dark Blue */
 #tiengviet-window.tonecolor-standard .tone5 {
-  color: #a0a0a0;
+  /* color: #a0a0a0; */
+  /* color: #5c4033; */
+  /* color: #003366; */
+  color: #7b3f00;
+}
+
+#tiengviet-window.tonecolor-standard .tone6 {
+  color: #000000;
 }
 
 /* Pleco Tone Colors */
-#tiengviet-window.tonecolor-pleco .tone1 {
+/* #tiengviet-window.tonecolor-pleco .tone1 {
   color: #e30000;
 }
 
@@ -213,10 +229,10 @@
 
 #tiengviet-window.tonecolor-pleco .tone5 {
   color: #777777;
-}
+} */
 
 /* Hanping Tone Colors */
-#tiengviet-window.tonecolor-hanping .tone1 {
+/* #tiengviet-window.tonecolor-hanping .tone1 {
   color: #64b4ff;
 }
 
@@ -234,4 +250,4 @@
 
 #tiengviet-window.tonecolor-hanping .tone5 {
   color: #a0a0a0;
-}
+} */

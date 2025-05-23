@@ -606,7 +606,7 @@ function searchDictionary(dictText: string, query: string) {
       if (maxLen < nextWordToSearch.length) {
         maxLen = nextWordToSearch.length - 2; // remove the ' :'
       }
-      entry.data.push([dentry, nextWordToSearch]);
+      entry.data.push([dentry, currentQuery]);
     }
 
     console.log('Searching for:', nextWordToSearch, { dentry });

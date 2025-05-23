@@ -988,7 +988,7 @@ function copyToClipboard(data: string): void {
   showPopup('Copied to clipboard', null, -1, -1);
 }
 
-function makeHtml(result: SearchResult, showToneColors: boolean): string {
+function makeHtml(result: SearchResult, showToneColors: boolean = true): string {
   console.log('makeHtml', { result, showToneColors });
   let html = '';
   const texts: Array<Array<string>> & {
@@ -1001,65 +1001,22 @@ function makeHtml(result: SearchResult, showToneColors: boolean): string {
     return '';
   }
 
-  for (let i = 0; i < result.data.length; ++i) {
-    // entry = result.data[i][0].match(/^([^\s]+?)\s+([^\s]+?)\s+\[(.*?)\]?\s*\/(.+)\//);
-    // if (!entry) continue;
-
-    // Hanzi
+  for (const dataEntry of result.data) {
+    const vietnamese = dataEntry.at(1);
+    const [, ...translations] = dataEntry.at(0).split(' : ');
+    const translation = translations.join(' : ');
 
     hanziClass = 'w-hanzi';
     if (config.fontSize === 'small') {
       hanziClass += '-small';
     }
-    html += '<span class="' + hanziClass + '">' + result.data[i][0] + '</span>&nbsp;';
-    // if (entry[1] !== entry[2]) {
-    //   html += '<span class="' + hanziClass + '">' + entry[1] + '</span>&nbsp;';
-    // }
-
-    // Pinyin
-
-    // let pinyinClass = 'w-pinyin';
-    // if (config.fontSize === 'small') {
-    //   pinyinClass += '-small';
-    // }
-    // let p = pinyinAndZhuyin(entry[3], showToneColors, pinyinClass);
-    // html += p[0];
-
-    // // Zhuyin
-
-    // if (config.zhuyin === 'yes') {
-    //   html += '<br>' + p[2];
-    // }
-
-    // Definition
+    html += '<span class="' + hanziClass + '">' + tonify(vietnamese) + '</span>&nbsp;';
 
     let defClass = 'w-def';
     if (config.fontSize === 'small') {
       defClass += '-small';
     }
-    // let translation = entry[4].replace(/\//g, ' ◆ ');
-    html +=
-      '<br><span class="' + defClass + '">' + result.data[i][0].split(' : ')[1] + '</span><br>';
-
-    let addFinalBr = false;
-
-    // // Grammar
-    // if (config.grammar !== 'no' && result.grammar && result.grammar.index === i) {
-    //   html += '<br><span class="grammar">Press "g" for grammar and usage notes.</span><br>';
-    //   addFinalBr = true;
-    // }
-
-    // Vocab
-    // if (config.vocab !== 'no' && result.vocab && result.vocab.index === i) {
-    //   html += '<br><span class="vocab">Press "v" for vocabulary notes.</span><br>';
-    //   addFinalBr = true;
-    // }
-
-    if (addFinalBr) {
-      html += '<br>';
-    }
-
-    // texts[i] = [entry[2], entry[1], p[1], translation, entry[3]];
+    html += '<br><span class="' + defClass + '">' + translation + '</span><br>';
   }
   if (result.more) {
     html += '&hellip;<br/>';
@@ -1074,129 +1031,72 @@ function makeHtml(result: SearchResult, showToneColors: boolean): string {
   return html;
 }
 
-const tones: Record<number, string> = {
-  1: '&#772;',
-  2: '&#769;',
-  3: '&#780;',
-  4: '&#768;',
-  5: '',
-};
-
-const utones: Record<number, string> = {
-  1: '\u0304',
-  2: '\u0301',
-  3: '\u030C',
-  4: '\u0300',
-  5: '',
-};
-
-function parse(s: string): RegExpMatchArray | null {
-  return s.match(/([^AEIOU:aeiou]*)([AEIOUaeiou:]+)([^aeiou:]*)([1-5])/);
-}
-
-function tonify(vowels: string, tone: number): [string, string] {
-  let html = '';
-  let text = '';
-
-  if (vowels === 'ou') {
-    html = 'o' + tones[tone] + 'u';
-    text = 'o' + utones[tone] + 'u';
-  } else {
-    let tonified = false;
-    for (let i = 0; i < vowels.length; i++) {
-      let c = vowels.charAt(i);
-      html += c;
-      text += c;
-      if (c === 'a' || c === 'e') {
-        html += tones[tone];
-        text += utones[tone];
-        tonified = true;
-      } else if (i === vowels.length - 1 && !tonified) {
-        html += tones[tone];
-        text += utones[tone];
-        tonified = true;
-      }
-    }
-    html = html.replace(/u:/, '&uuml;');
-    text = text.replace(/u:/, '\u00FC');
+function tonify(text: string): string {
+  if (!text) {
+    return '';
   }
 
-  return [html, text];
+  let pinyinClass = 'w-pinyin';
+  if (config.fontSize === 'small') {
+    pinyinClass += '-small';
+  }
+
+  let result = '';
+  for (const word of text.split(' ')) {
+    const tone = detectVietnameseTone(word);
+    result += `<span class="${pinyinClass} ${tone}">${word}</span> `;
+  }
+
+  return result;
 }
 
-function pinyinAndZhuyin(
-  syllables: string,
-  showToneColors: boolean,
-  pinyinClass: string,
-): [string, string, string] {
-  let text = '';
-  let html = '';
-  let zhuyin = '';
-  let a = syllables.split(/[\s·]+/);
-  for (let i = 0; i < a.length; i++) {
-    let syllable = a[i];
+/**
+ * Detect the Vietnamese tone from a given word.
+ *
+ * @param word - Vietnamese word to check.
+ * @returns - A string indicating the tone type: 'sắc', 'huyền', 'hỏi', 'ngã', 'nặng', or 'ngang'.
+ */
+function detectVietnameseTone(word: string): string {
+  // Normalize the word to decompose characters (NFD form).
+  const normalized = word.normalize('NFD');
+  console.log('detectVietnameseTone', { word, normalized });
 
-    // ',' in pinyin
-    if (syllable === ',') {
-      html += ' ,';
-      text += ' ,';
-      continue;
-    }
+  // These are the Unicode codes for the tone marks.
+  // const toneMap: { [key: string]: string } = {
+  //   '\u0301': 'sắc', // Combining Acute Accent
+  //   '\u0300': 'huyền', // Combining Grave Accent
+  //   '\u0309': 'hỏi', // Combining Hook Above
+  //   '\u0303': 'ngã', // Combining Tilde
+  //   '\u0323': 'nặng', // Combining Dot Below
+  // };
 
-    if (i > 0) {
-      html += '&nbsp;';
-      text += ' ';
-      zhuyin += '&nbsp;';
-    }
-    if (syllable === 'r5') {
-      if (showToneColors) {
-        html += '<span class="' + pinyinClass + ' tone5">r</span>';
-      } else {
-        html += '<span class="' + pinyinClass + '">r</span>';
-      }
-      text += 'r';
-      continue;
-    }
-    if (syllable === 'xx5') {
-      if (showToneColors) {
-        html += '<span class="' + pinyinClass + ' tone5">??</span>';
-      } else {
-        html += '<span class="' + pinyinClass + '">??</span>';
-      }
-      text += '??';
-      continue;
-    }
-    let m = parse(syllable);
-    if (m) {
-      if (showToneColors) {
-        html += '<span class="' + pinyinClass + ' tone' + m[4] + '">';
-      } else {
-        html += '<span class="' + pinyinClass + '">';
-      }
-      let t = tonify(m[2], parseInt(m[4], 10));
-      html += m[1] + t[0] + m[3];
-      html += '</span>';
-      text += m[1] + t[1] + m[3];
+  const toneMap: { [key: string]: string } = {
+    '\u0301': 'tone1', // Combining Acute Accent
+    '\u0300': 'tone2', // Combining Grave Accent
+    '\u0309': 'tone3', // Combining Hook Above
+    '\u0303': 'tone4', // Combining Tilde
+    '\u0323': 'tone5', // Combining Dot Below
+  };
 
-      let zhuyinClass = 'w-zhuyin';
-      if (config.fontSize === 'small') {
-        zhuyinClass += '-small';
-      }
-
-      // zhuyin +=
-      //   '<span class="tone' +
-      //   m[4] +
-      //   ' ' +
-      //   zhuyinClass +
-      //   '">' +
-      //   window.numericPinyin2Zhuyin(syllable) +
-      //   '</span>';
+  // Iterate through each character in the normalized string.
+  for (const char of normalized) {
+    if (toneMap[char]) {
+      return toneMap[char];
     }
   }
-  return [html, text, zhuyin];
+
+  // If no tone mark is found, return level tone.
+  // return 'ngang';
+  return 'tone6';
 }
 
-let miniHelp = `
+// Example usage:
+const words = ['ma', 'má', 'mà', 'mả', 'mã', 'mạ'];
+words.forEach((word) => {
+  console.log(`The tone in "${word}" is: ${detectVietnameseTone(word)}`);
+});
+
+const miniHelp = `
     <span style="font-weight: bold;">Zhongwen Chinese-English Dictionary</span><br><br>
     <p>Keyboard shortcuts:<p>
     <table style="margin: 10px;" cellspacing=5 cellpadding=5>
@@ -1242,15 +1142,15 @@ chrome.runtime.onMessage.addListener((request) => {
     case 'disable':
       disableTab();
       break;
-    // case 'showPopup':
-    //   if (!request.isHelp || window === window.top) {
-    //     showPopup(request.text);
-    //   }
-    //   break;
-    // case 'showHelp':
-    //   showPopup(miniHelp);
-    //   break;
-    // default:
+    case 'showPopup':
+      if (!request.isHelp || window === window.top) {
+        showPopup(request.text);
+      }
+      break;
+    case 'showHelp':
+      showPopup(miniHelp);
+      break;
+    default:
   }
 });
 
