@@ -1059,8 +1059,6 @@ function tonify(text: string): string {
 function detectVietnameseTone(word: string): string {
   // Normalize the word to decompose characters (NFD form).
   const normalized = word.normalize('NFD');
-  console.log('detectVietnameseTone', { word, normalized });
-
   // These are the Unicode codes for the tone marks.
   // const toneMap: { [key: string]: string } = {
   //   '\u0301': 'sắc', // Combining Acute Accent
@@ -1089,12 +1087,6 @@ function detectVietnameseTone(word: string): string {
   // return 'ngang';
   return 'tone6';
 }
-
-// Example usage:
-const words = ['ma', 'má', 'mà', 'mả', 'mã', 'mạ'];
-words.forEach((word) => {
-  console.log(`The tone in "${word}" is: ${detectVietnameseTone(word)}`);
-});
 
 const miniHelp = `
     <span style="font-weight: bold;">Zhongwen Chinese-English Dictionary</span><br><br>

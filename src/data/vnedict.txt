@@ -1,6 +1,4 @@
-﻿
-﻿# VNEDICT – 15 February 2019 - Paul Denisowski (www.denisowski.org)
-A Dong : Adam
+﻿A Dong : Adam
 A La Hán : Arhant, Lohan (follower of Buddha)
 A Lịch Sơn : Alexander
 A Lịch Sơn Đắc Lộ : Alexandre de Rhodes
@@ -516,7 +514,7 @@ Thiên xúng : Libra
 Thiền học : Zen
 Thành Hồ : Ho Chi Minh City (Saigon)
 Thành Phố Hồ Chí Minh : Ho Chi Minh City (Saigon)
-Thái : Thai	
+Thái : Thai
 Thái Bình Dương : the Pacific Ocean
 Thái Cực Đạo : Tae Kwon Do
 Thái Hòa Phục Hưng : Showa Restoration
@@ -6287,7 +6285,7 @@ chích ảnh : lonely shadow
 chín : nine
 chín bệ : throne
 chín cây : ripened on the tree
-chín giờ : 9 o’clock	
+chín giờ : 9 o’clock
 chín khúc : heart
 chín mươi lăm : ninety five
 chín nghìn : very, very much
@@ -8814,7 +8812,7 @@ cân anh : English pounds (unit of weight)
 cân bàn : bascule balance
 cân bằng : balance, equilibrium; to balance, equal out
 cân bằng ngân sách : to balance the budget
-cân bằng pha : phase balance 	
+cân bằng pha : phase balance
 cân cốt : strength, force, vigor
 cân hơi : weight of an animal still alive, live weight
 cân kẹo : to weigh

@@ -171,6 +171,8 @@ type MessageRequest = SearchRequest | OpenRequest | CopyRequest | AddRequest;
 
 console.log('Zhongwen extension loaded', {});
 
+let tiengvietDict: TiengvietDictionary;
+
 // let isEnabled = localStorage['enabled'] === '1';
 // let isEnabled = false;
 // chrome.storage.local.get('enabled', (data) => {
@@ -449,11 +451,9 @@ chrome.runtime.onMessage.addListener((request: MessageRequest, sender, callback)
   switch (request.type) {
     case 'search':
       {
-        ensureDictLoaded().then((dictText) => {
-          const response = searchDictionary(
-            dictText as string,
-            (request as { text: string })?.text,
-          );
+        ensureDictLoaded().then((tiengvietDict: TiengvietDictionary) => {
+          const response = tiengvietDict.search((request as { text: string })?.text);
+          // const response = searchDictionary(tiengvietDict, (request as { text: string })?.text);
           console.log('Search results:', { results: response });
           if (response) {
             response.originalText = request.originalText;
@@ -535,62 +535,66 @@ chrome.runtime.onMessage.addListener((request: MessageRequest, sender, callback)
   return true;
 });
 
-let db: IDBDatabase;
+// let db: IDBDatabase;
 
-function openDatabase(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('TiengvietDB', 1);
+// function openDatabase(): Promise<IDBDatabase> {
+//   return new Promise((resolve, reject) => {
+//     const request = indexedDB.open('TiengvietDB', 1);
 
-    request.onupgradeneeded = (event) => {
-      db = request.result;
-      db.createObjectStore('dictionary');
-    };
+//     request.onupgradeneeded = (event) => {
+//       db = request.result;
+//       db.createObjectStore('dictionary');
+//     };
 
-    request.onsuccess = () => {
-      db = request.result;
-      resolve(db);
-    };
+//     request.onsuccess = () => {
+//       db = request.result;
+//       resolve(db);
+//     };
 
-    request.onerror = () => {
-      reject(request.error);
-    };
-  });
-}
+//     request.onerror = () => {
+//       reject(request.error);
+//     };
+//   });
+// }
 
-function saveToIndexedDB(text: string) {
-  return openDatabase().then((db) => {
-    const tx = db.transaction('dictionary', 'readwrite');
-    const store = tx.objectStore('dictionary');
-    store.put(text, 'dict');
-    // return tx.complete;
-  });
-}
+// async function saveToIndexedDB(text: string) {
+//   const db = await openDatabase();
+//   const tx = db.transaction('dictionary', 'readwrite');
+//   const store = tx.objectStore('dictionary');
+//   store.put(text, 'dict');
+// }
 
-function getFromIndexedDB() {
-  return openDatabase().then((db) => {
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction('dictionary', 'readonly');
-      const store = tx.objectStore('dictionary');
-      const request = store.get('dict');
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  });
-}
+// async function getFromIndexedDB() {
+//   const db = await openDatabase();
+//   return await new Promise((resolve, reject) => {
+//     const tx = db.transaction('dictionary', 'readonly');
+//     const store = tx.objectStore('dictionary');
+//     const request = store.get('dict');
+//     request.onsuccess = () => resolve(request.result);
+//     request.onerror = () => reject(request.error);
+//   });
+// }
 
-async function ensureDictLoaded() {
-  const existing = await getFromIndexedDB();
-  if (existing) return existing;
+async function ensureDictLoaded(): Promise<TiengvietDictionary> {
+  if (tiengvietDict && tiengvietDict.dict) {
+    return tiengvietDict;
+  }
+
+  // const existing = await getFromIndexedDB();
+  // if (existing) {
+  //   return existing;
+  // }
 
   const response = await fetch(chrome.runtime.getURL('data/vnedict.txt'));
   const text = await response.text();
-  await saveToIndexedDB(text);
-  return text;
+  // await saveToIndexedDB(text);
+
+  tiengvietDict = new TiengvietDictionary(text);
+  return tiengvietDict;
 }
 
-function searchDictionary(dictText: string, query: string) {
+function searchDictionary(tiengvietDict: TiengvietDictionary, query: string) {
   const entry: IDictionaryEntry = { data: [], matchLen: 0 };
-  const lines: string[] = dictText.split('\n');
   query = query.toLocaleLowerCase();
 
   console.log({ query });
@@ -599,17 +603,16 @@ function searchDictionary(dictText: string, query: string) {
   let maxLen = 0;
 
   while (currentQuery.length > 0) {
-    const nextWordToSearch = currentQuery + ' :';
-    const dentry = lines.find((line) => line.toLocaleLowerCase().startsWith(nextWordToSearch));
+    const dentry = tiengvietDict.getWordEntry(currentQuery.toLocaleLowerCase());
 
     if (dentry) {
-      if (maxLen < nextWordToSearch.length) {
-        maxLen = nextWordToSearch.length - 2; // remove the ' :'
+      if (maxLen < currentQuery.length) {
+        maxLen = currentQuery.length;
       }
-      entry.data.push([dentry, currentQuery]);
+      entry.data.push([dentry.at(0), currentQuery]);
     }
 
-    console.log('Searching for:', nextWordToSearch, { dentry });
+    console.log('Searching for:', currentQuery, { dentry });
 
     // Check if the rightmost character is an alphabet character
     if (currentQuery.length > 0) {
@@ -633,6 +636,37 @@ function searchDictionary(dictText: string, query: string) {
 
   entry.matchLen = maxLen;
   return entry;
+}
+
+class TiengvietDictionary {
+  dict: Record<string, string[]>;
+
+  constructor(text: string) {
+    this.dict = this.parseDictionary(text);
+  }
+
+  private parseDictionary(text: string): Record<string, string[]> {
+    const dict: Record<string, string[]> = {};
+    const lines = text.split('\n');
+    for (const line of lines) {
+      const [originalVietnameseWord, ...values] = line.split(' : ');
+      const translation = values.join(' : ');
+      dict[originalVietnameseWord.toLocaleLowerCase()] = [
+        line,
+        originalVietnameseWord,
+        translation,
+      ];
+    }
+    return dict;
+  }
+
+  search(word: string): IDictionaryEntry | null {
+    return searchDictionary(this, word);
+  }
+
+  getWordEntry(word: string): string[] | undefined {
+    return this.dict[word];
+  }
 }
 
 // class ZhongwenDictionary {
