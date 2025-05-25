@@ -112,10 +112,7 @@ let timer: number | null = null;
 
 let altView = 0;
 
-let savedSearchResults: Array<Array<string>> & {
-  grammar?: { keyword: string; index: number };
-  vocab?: { keyword: string; index: number };
-} = [];
+let savedSearchResults: string[] = [];
 
 let savedSelStartOffset = 0;
 
@@ -129,13 +126,12 @@ const zwnj = /\u200c/g;
 
 function enableTab(): void {
   document.addEventListener('mousemove', onMouseMove);
-  // TODO: return to using keydown events
-  // document.addEventListener('keydown', onKeyDown);
+  document.addEventListener('keydown', onKeyDown);
 }
 
 function disableTab(): void {
   document.removeEventListener('mousemove', onMouseMove);
-  // document.removeEventListener('keydown', onKeyDown);
+  document.removeEventListener('keydown', onKeyDown);
 
   const popup = document.getElementById(tiengvietWindowId);
   if (popup) {
@@ -156,162 +152,162 @@ function onKeyDown(keyDown: KeyboardEvent): void {
     return;
   }
 
-  if (keyDown.altKey && keyDown.keyCode === 87) {
-    // Alt + w
-    chrome.runtime.sendMessage({
-      type: 'open',
-      tabType: 'wordlist',
-      url: '/wordlist.html',
-    });
-    return;
-  }
+  // if (keyDown.altKey && keyDown.keyCode === 87) {
+  //   // Alt + w
+  //   chrome.runtime.sendMessage({
+  //     type: 'open',
+  //     tabType: 'wordlist',
+  //     url: '/wordlist.html',
+  //   });
+  //   return;
+  // }
 
   if (!isVisible()) {
     return;
   }
 
   switch (keyDown.keyCode) {
-    case 65: // 'a'
-      altView = (altView + 1) % 3;
-      triggerSearch();
-      break;
+    // case 65: // 'a'
+    //   altView = (altView + 1) % 3;
+    //   triggerSearch();
+    //   break;
 
     case 67: // 'c'
       copyToClipboard(getTextForClipboard());
       break;
 
-    case 66: // 'b'
-      {
-        let offset = selStartDelta;
-        for (let i = 0; i < 10; i++) {
-          selStartDelta = --offset;
-          let ret = triggerSearch();
-          if (ret === 0) {
-            break;
-          } else if (ret === 2) {
-            if (savedRangeNode && savedRangeNode.parentNode) {
-              savedRangeNode = findPreviousTextNode(savedRangeNode.parentNode, savedRangeNode);
-              savedRangeOffset = 0;
-              offset = savedRangeNode ? savedRangeNode.textContent?.length || 0 : 0;
-            }
-          }
-        }
-      }
-      break;
+    // case 66: // 'b'
+    //   {
+    //     let offset = selStartDelta;
+    //     for (let i = 0; i < 10; i++) {
+    //       selStartDelta = --offset;
+    //       let ret = triggerSearch();
+    //       if (ret === 0) {
+    //         break;
+    //       } else if (ret === 2) {
+    //         if (savedRangeNode && savedRangeNode.parentNode) {
+    //           savedRangeNode = findPreviousTextNode(savedRangeNode.parentNode, savedRangeNode);
+    //           savedRangeOffset = 0;
+    //           offset = savedRangeNode ? savedRangeNode.textContent?.length || 0 : 0;
+    //         }
+    //       }
+    //     }
+    //   }
+    //   break;
 
-    case 71: // 'g'
-      if (config.grammar !== 'no' && savedSearchResults.grammar) {
-        let sel = encodeURIComponent(window.getSelection()?.toString() || '');
+    // case 71: // 'g'
+    //   if (config.grammar !== 'no' && savedSearchResults.grammar) {
+    //     let sel = encodeURIComponent(window.getSelection()?.toString() || '');
 
-        // https://resources.allsetlearning.com/chinese/grammar/%E4%B8%AA
-        let allset = 'https://resources.allsetlearning.com/chinese/grammar/' + sel;
+    //     // https://resources.allsetlearning.com/chinese/grammar/%E4%B8%AA
+    //     let allset = 'https://resources.allsetlearning.com/chinese/grammar/' + sel;
 
-        chrome.runtime.sendMessage({
-          type: 'open',
-          tabType: 'grammar',
-          url: allset,
-        });
-      }
-      break;
+    //     chrome.runtime.sendMessage({
+    //       type: 'open',
+    //       tabType: 'grammar',
+    //       url: allset,
+    //     });
+    //   }
+    //   break;
 
-    case 77: // 'm'
-      selStartIncrement = 1;
-    // falls through
-    case 78: // 'n'
-      for (let i = 0; i < 10; i++) {
-        selStartDelta += selStartIncrement;
-        let ret = triggerSearch();
-        if (ret === 0) {
-          break;
-        } else if (ret === 2) {
-          if (savedRangeNode && savedRangeNode.parentNode) {
-            savedRangeNode = findNextTextNode(savedRangeNode.parentNode, savedRangeNode);
-            savedRangeOffset = 0;
-            selStartDelta = 0;
-            selStartIncrement = 0;
-          }
-        }
-      }
-      break;
+    // case 77: // 'm'
+    //   selStartIncrement = 1;
+    // // falls through
+    // case 78: // 'n'
+    //   for (let i = 0; i < 10; i++) {
+    //     selStartDelta += selStartIncrement;
+    //     let ret = triggerSearch();
+    //     if (ret === 0) {
+    //       break;
+    //     } else if (ret === 2) {
+    //       if (savedRangeNode && savedRangeNode.parentNode) {
+    //         savedRangeNode = findNextTextNode(savedRangeNode.parentNode, savedRangeNode);
+    //         savedRangeOffset = 0;
+    //         selStartDelta = 0;
+    //         selStartIncrement = 0;
+    //       }
+    //     }
+    //   }
+    //   break;
 
-    case 82: // 'r'
-      {
-        const entries = [] as Record<string, string>[];
-        for (let j = 0; j < savedSearchResults.length; j++) {
-          const entry = {
-            simplified: savedSearchResults[j][0],
-            traditional: savedSearchResults[j][1],
-            pinyin: savedSearchResults[j][2],
-            definition: savedSearchResults[j][3],
-          };
-          entries.push(entry);
-        }
+    // case 82: // 'r'
+    //   {
+    //     const entries = [] as Record<string, string>[];
+    //     for (let j = 0; j < savedSearchResults.length; j++) {
+    //       const entry = {
+    //         simplified: savedSearchResults[j][0],
+    //         traditional: savedSearchResults[j][1],
+    //         pinyin: savedSearchResults[j][2],
+    //         definition: savedSearchResults[j][3],
+    //       };
+    //       entries.push(entry);
+    //     }
 
-        chrome.runtime.sendMessage({
-          type: 'add',
-          entries: entries,
-        });
+    //     chrome.runtime.sendMessage({
+    //       type: 'add',
+    //       entries: entries,
+    //     });
 
-        showPopup('Added to word list.<p>Press Alt+W to open word list.', null, -1, -1);
-      }
-      break;
+    //     showPopup('Added to word list.<p>Press Alt+W to open word list.', null, -1, -1);
+    //   }
+    //   break;
 
-    case 83: // 's'
-      {
-        // https://www.skritter.com/vocab/api/add?from=Chrome&lang=zh&word=浏览&trad=瀏 覽&rdng=liú lǎn&defn=to skim over; to browse
+    // case 83: // 's'
+    //   {
+    //     // https://www.skritter.com/vocab/api/add?from=Chrome&lang=zh&word=浏览&trad=瀏 覽&rdng=liú lǎn&defn=to skim over; to browse
 
-        let skritter = 'https://skritter.com';
-        if (config.skritterTLD === 'cn') {
-          skritter = 'https://skritter.cn';
-        }
+    //     let skritter = 'https://skritter.com';
+    //     if (config.skritterTLD === 'cn') {
+    //       skritter = 'https://skritter.cn';
+    //     }
 
-        skritter +=
-          '/vocab/api/add?from=zhongwen&ref=zhongwen&lang=zh&word=' +
-          encodeURIComponent(savedSearchResults[0][0]) +
-          '&trad=' +
-          encodeURIComponent(savedSearchResults[0][1]) +
-          '&rdng=' +
-          encodeURIComponent(savedSearchResults[0][4]) +
-          '&defn=' +
-          encodeURIComponent(savedSearchResults[0][3]);
+    //     skritter +=
+    //       '/vocab/api/add?from=zhongwen&ref=zhongwen&lang=zh&word=' +
+    //       encodeURIComponent(savedSearchResults[0][0]) +
+    //       '&trad=' +
+    //       encodeURIComponent(savedSearchResults[0][1]) +
+    //       '&rdng=' +
+    //       encodeURIComponent(savedSearchResults[0][4]) +
+    //       '&defn=' +
+    //       encodeURIComponent(savedSearchResults[0][3]);
 
-        chrome.runtime.sendMessage({
-          type: 'open',
-          tabType: 'skritter',
-          url: skritter,
-        });
-      }
-      break;
+    //     chrome.runtime.sendMessage({
+    //       type: 'open',
+    //       tabType: 'skritter',
+    //       url: skritter,
+    //     });
+    //   }
+    //   break;
 
-    case 84: // 't'
-      {
-        let sel = encodeURIComponent(window.getSelection()?.toString() || '');
+    // case 84: // 't'
+    //   {
+    //     let sel = encodeURIComponent(window.getSelection()?.toString() || '');
 
-        // https://tatoeba.org/eng/sentences/search?from=cmn&to=eng&query=%E8%BF%9B%E8%A1%8C
-        let tatoeba = 'https://tatoeba.org/eng/sentences/search?from=cmn&to=eng&query=' + sel;
+    //     // https://tatoeba.org/eng/sentences/search?from=cmn&to=eng&query=%E8%BF%9B%E8%A1%8C
+    //     let tatoeba = 'https://tatoeba.org/eng/sentences/search?from=cmn&to=eng&query=' + sel;
 
-        chrome.runtime.sendMessage({
-          type: 'open',
-          tabType: 'tatoeba',
-          url: tatoeba,
-        });
-      }
-      break;
+    //     chrome.runtime.sendMessage({
+    //       type: 'open',
+    //       tabType: 'tatoeba',
+    //       url: tatoeba,
+    //     });
+    //   }
+    //   break;
 
-    case 86: // 'v'
-      if (config.vocab !== 'no' && savedSearchResults.vocab) {
-        let sel = encodeURIComponent(window.getSelection()?.toString() || '');
+    // case 86: // 'v'
+    //   if (config.vocab !== 'no' && savedSearchResults.vocab) {
+    //     let sel = encodeURIComponent(window.getSelection()?.toString() || '');
 
-        // https://resources.allsetlearning.com/chinese/vocabulary/%E4%B8%AA
-        let allset = 'https://resources.allsetlearning.com/chinese/vocabulary/' + sel;
+    //     // https://resources.allsetlearning.com/chinese/vocabulary/%E4%B8%AA
+    //     let allset = 'https://resources.allsetlearning.com/chinese/vocabulary/' + sel;
 
-        chrome.runtime.sendMessage({
-          type: 'open',
-          tabType: 'vocab',
-          url: allset,
-        });
-      }
-      break;
+    //     chrome.runtime.sendMessage({
+    //       type: 'open',
+    //       tabType: 'vocab',
+    //       url: allset,
+    //     });
+    //   }
+    //   break;
 
     case 88: // 'x'
       altView = 0;
@@ -325,113 +321,113 @@ function onKeyDown(keyDown: KeyboardEvent): void {
       triggerSearch();
       break;
 
-    case 49: // '1'
-      if (keyDown.altKey) {
-        // use the simplified character for linedict lookup
-        let simp = savedSearchResults[0][0];
+    // case 49: // '1'
+    //   if (keyDown.altKey) {
+    //     // use the simplified character for linedict lookup
+    //     let simp = savedSearchResults[0][0];
 
-        // https://english.dict.naver.com/english-chinese-dictionary/#/search?query=%E8%AF%8D%E5%85%B8
-        let linedict =
-          'https://english.dict.naver.com/english-chinese-dictionary/#/search?query=' +
-          encodeURIComponent(simp);
+    //     // https://english.dict.naver.com/english-chinese-dictionary/#/search?query=%E8%AF%8D%E5%85%B8
+    //     let linedict =
+    //       'https://english.dict.naver.com/english-chinese-dictionary/#/search?query=' +
+    //       encodeURIComponent(simp);
 
-        chrome.runtime.sendMessage({
-          type: 'open',
-          tabType: 'linedict',
-          url: linedict,
-        });
-      }
-      break;
+    //     chrome.runtime.sendMessage({
+    //       type: 'open',
+    //       tabType: 'linedict',
+    //       url: linedict,
+    //     });
+    //   }
+    //   break;
 
-    case 50: // '2'
-      if (keyDown.altKey) {
-        let sel = encodeURIComponent(window.getSelection()?.toString() || '');
+    // case 50: // '2'
+    //   if (keyDown.altKey) {
+    //     let sel = encodeURIComponent(window.getSelection()?.toString() || '');
 
-        // https://forvo.com/search/%E4%B8%AD%E6%96%87/zh/
-        var forvo = 'https://forvo.com/search/' + sel + '/zh/';
+    //     // https://forvo.com/search/%E4%B8%AD%E6%96%87/zh/
+    //     var forvo = 'https://forvo.com/search/' + sel + '/zh/';
 
-        chrome.runtime.sendMessage({
-          type: 'open',
-          tabType: 'forvo',
-          url: forvo,
-        });
-      }
-      break;
+    //     chrome.runtime.sendMessage({
+    //       type: 'open',
+    //       tabType: 'forvo',
+    //       url: forvo,
+    //     });
+    //   }
+    //   break;
 
-    case 51: // '3'
-      if (keyDown.altKey) {
-        let sel = encodeURIComponent(window.getSelection()?.toString() || '');
+    // case 51: // '3'
+    //   if (keyDown.altKey) {
+    //     let sel = encodeURIComponent(window.getSelection()?.toString() || '');
 
-        // https://dict.cn/%E7%BF%BB%E8%AF%91
-        let dictcn = 'https://dict.cn/' + sel;
+    //     // https://dict.cn/%E7%BF%BB%E8%AF%91
+    //     let dictcn = 'https://dict.cn/' + sel;
 
-        chrome.runtime.sendMessage({
-          type: 'open',
-          tabType: 'dictcn',
-          url: dictcn,
-        });
-      }
-      break;
+    //     chrome.runtime.sendMessage({
+    //       type: 'open',
+    //       tabType: 'dictcn',
+    //       url: dictcn,
+    //     });
+    //   }
+    //   break;
 
-    case 52: // '4'
-      if (keyDown.altKey) {
-        let sel = encodeURIComponent(window.getSelection()?.toString() || '');
+    // case 52: // '4'
+    //   if (keyDown.altKey) {
+    //     let sel = encodeURIComponent(window.getSelection()?.toString() || '');
 
-        // https://www.iciba.com/%E4%B8%AD%E9%A4%90
-        let iciba = 'https://www.iciba.com/' + sel;
+    //     // https://www.iciba.com/%E4%B8%AD%E9%A4%90
+    //     let iciba = 'https://www.iciba.com/' + sel;
 
-        chrome.runtime.sendMessage({
-          type: 'open',
-          tabType: 'iciba',
-          url: iciba,
-        });
-      }
-      break;
+    //     chrome.runtime.sendMessage({
+    //       type: 'open',
+    //       tabType: 'iciba',
+    //       url: iciba,
+    //     });
+    //   }
+    //   break;
 
-    case 53: // '5'
-      if (keyDown.altKey) {
-        let sel = encodeURIComponent(window.getSelection()?.toString() || '');
+    // case 53: // '5'
+    //   if (keyDown.altKey) {
+    //     let sel = encodeURIComponent(window.getSelection()?.toString() || '');
 
-        // https://www.mdbg.net/chinese/dictionary?page=worddict&wdrst=0&wdqb=%E4%B8%AD%E6%96%87
-        let mdbg = 'https://www.mdbg.net/chinese/dictionary?page=worddict&wdrst=0&wdqb=' + sel;
+    //     // https://www.mdbg.net/chinese/dictionary?page=worddict&wdrst=0&wdqb=%E4%B8%AD%E6%96%87
+    //     let mdbg = 'https://www.mdbg.net/chinese/dictionary?page=worddict&wdrst=0&wdqb=' + sel;
 
-        chrome.runtime.sendMessage({
-          type: 'open',
-          tabType: 'mdbg',
-          url: mdbg,
-        });
-      }
-      break;
+    //     chrome.runtime.sendMessage({
+    //       type: 'open',
+    //       tabType: 'mdbg',
+    //       url: mdbg,
+    //     });
+    //   }
+    //   break;
 
-    case 54: // '6'
-      if (keyDown.altKey) {
-        let sel = encodeURIComponent(window.getSelection()?.toString() || '');
+    // case 54: // '6'
+    //   if (keyDown.altKey) {
+    //     let sel = encodeURIComponent(window.getSelection()?.toString() || '');
 
-        let reverso = 'https://context.reverso.net/translation/chinese-english/' + sel;
+    //     let reverso = 'https://context.reverso.net/translation/chinese-english/' + sel;
 
-        chrome.runtime.sendMessage({
-          type: 'open',
-          tabType: 'reverso',
-          url: reverso,
-        });
-      }
-      break;
+    //     chrome.runtime.sendMessage({
+    //       type: 'open',
+    //       tabType: 'reverso',
+    //       url: reverso,
+    //     });
+    //   }
+    //   break;
 
-    case 55: // '7'
-      if (keyDown.altKey) {
-        // use the traditional character for moedict lookup
-        let trad = savedSearchResults[0][1];
+    // case 55: // '7'
+    //   if (keyDown.altKey) {
+    //     // use the traditional character for moedict lookup
+    //     let trad = savedSearchResults[0][1];
 
-        // https://www.moedict.tw/~%E4%B8%AD%E6%96%87
-        let moedict = 'https://www.moedict.tw/~' + encodeURIComponent(trad);
+    //     // https://www.moedict.tw/~%E4%B8%AD%E6%96%87
+    //     let moedict = 'https://www.moedict.tw/~' + encodeURIComponent(trad);
 
-        chrome.runtime.sendMessage({
-          type: 'open',
-          tabType: 'moedict',
-          url: moedict,
-        });
-      }
-      break;
+    //     chrome.runtime.sendMessage({
+    //       type: 'open',
+    //       tabType: 'moedict',
+    //       url: moedict,
+    //     });
+    //   }
+    //   break;
 
     default:
       return;
@@ -570,7 +566,7 @@ function triggerSearch(): number {
 
   // Workaround for Google Docs: remove zero-width non-joiner &zwnj;
   const text = originalText.replace(zwnj, '');
-  // console.log('triggerSearch', { text });
+  console.log('triggerSearch', { text });
 
   savedSelStartOffset = selStartOffset;
   savedSelEndList = selEndList;
@@ -764,7 +760,7 @@ function getText(
     previousNode = nextNode;
   }
 
-  return text;
+  return text.replace(/\s+/g, ' ');
 }
 
 // modifies selEndList as a side-effect
@@ -960,14 +956,13 @@ function clearHighlight(): void {
 
 function isVisible(): boolean {
   const popup = document.getElementById(tiengvietWindowId);
-  return popup !== null && popup.style.display !== 'none';
+  return !!popup && popup.style.display !== 'none';
 }
 
 function getTextForClipboard(): string {
   let result = '';
-  for (let i = 0; i < savedSearchResults.length; i++) {
-    result += savedSearchResults[i].slice(0, -1).join('\t');
-    result += '\n';
+  for (const searchResult of savedSearchResults) {
+    result += searchResult;
   }
   return result;
 }
@@ -1040,20 +1035,44 @@ function findPreviousTextNode(root: Node | null, previous: Node): Node | null {
 }
 
 function copyToClipboard(data: string): void {
-  chrome.runtime.sendMessage({
-    type: 'copy',
-    data: data,
-  });
+  // chrome.runtime.sendMessage({
+  //   type: 'copy',
+  //   data: data,
+  // });
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard
+      .writeText(data)
+      .then(() => {
+        showPopup('Copied to clipboard', null, -1, -1);
+      })
+      .catch((err) => {
+        console.error('Clipboard write failed:', err);
+      });
+  } else {
+    // Fallback: create temporary textarea
+    const textarea = document.createElement('textarea');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-100%';
+    textarea.value = data;
+    document.body.appendChild(textarea);
+    textarea.select();
 
-  showPopup('Copied to clipboard', null, -1, -1);
+    try {
+      const success = document.execCommand('copy');
+      if (success) {
+        showPopup('Copied to clipboard', null, -1, -1);
+      }
+    } catch (err) {
+      console.error('Fallback copy failed', err);
+    }
+
+    document.body.removeChild(textarea);
+  }
 }
 
 function makeHtml(result: SearchResult, showToneColors: boolean = true): string {
   let html = '';
-  const texts: Array<Array<string>> & {
-    grammar?: { keyword: string; index: number };
-    vocab?: { keyword: string; index: number };
-  } = [];
+  const texts = [];
   let hanziClass;
 
   if (result === null) {
@@ -1064,6 +1083,7 @@ function makeHtml(result: SearchResult, showToneColors: boolean = true): string 
     const vietnamese = dataEntry.at(1);
     const [, ...translations] = dataEntry.at(0).split(' : ');
     const translation = translations.join(' : ');
+    texts.push(dataEntry.at(0));
 
     hanziClass = 'w-hanzi';
     if (config.fontSize === 'small') {
@@ -1082,8 +1102,8 @@ function makeHtml(result: SearchResult, showToneColors: boolean = true): string 
   }
 
   savedSearchResults = texts;
-  savedSearchResults.grammar = result.grammar;
-  savedSearchResults.vocab = result.vocab;
+  // savedSearchResults.grammar = result.grammar;
+  // savedSearchResults.vocab = result.vocab;
 
   return html;
 }

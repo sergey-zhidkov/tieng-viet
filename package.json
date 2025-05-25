@@ -1,6 +1,6 @@
 {
   "name": "tieng-viet",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Vietnamese Pop-Up Dictionary",
   "repository": {
     "type": "git",
@@ -10,7 +10,7 @@
     "Vietnamese",
     "Dictionary"
   ],
-  "author": "Christian Schiller",
+  "author": "Sergey Zhidkov",
   "license": "GPL-2.0",
   "bugs": {
     "url": "https://github.com/sergey-zhidkov/tieng-viet/issues"

@@ -362,20 +362,6 @@ chrome.runtime.onMessage.addListener((request: MessageRequest, sender, callback)
       }
       break;
 
-    case 'copy':
-      {
-        // TODO: move to content script
-        // let txt = document.createElement('textarea');
-        // txt.style.position = 'absolute';
-        // txt.style.left = '-100%';
-        // txt.value = request.data;
-        // document.body.appendChild(txt);
-        // txt.select();
-        // document.execCommand('copy');
-        // document.body.removeChild(txt);
-      }
-      break;
-
     case 'add':
       {
         // TODO: update localStorage use
@@ -435,8 +421,9 @@ class TiengvietDictionary {
     for (const line of lines) {
       const [originalVietnameseWord, ...values] = line.split(' : ');
       const translation = values.join(' : ');
+      const [, , existingTranslation] = dict[originalVietnameseWord.toLocaleLowerCase()] || [];
       dict[originalVietnameseWord.toLocaleLowerCase()] = [
-        line,
+        line + `${existingTranslation ? `; ${existingTranslation}` : ''}`,
         originalVietnameseWord,
         translation,
       ];

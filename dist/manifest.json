@@ -2,11 +2,16 @@
   "manifest_version": 3,
   "name": "TiengViet: Vietnamese-English Dictionary",
   "short_name": "TiengViet",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage_url": "https://github.com/sergey-zhidkov/tieng-viet",
   "description": "Great tool for learning Vietnamese. Translate words from Vietnamese to English when hovering over them.",
   "icons": {
     "128": "images/icon-128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tiengviet@education.org"
+    }
   },
   "action": {
     "default_icon": "images/icon-128.png",
