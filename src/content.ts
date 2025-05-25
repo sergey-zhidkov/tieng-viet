@@ -1,5 +1,9 @@
 /*
- Zhongwen - A Chinese-English Pop-Up Dictionary
+Tiengviet Vietnamese-English Dictionary as a fork of Zhongwen
+
+---
+
+ Originally based on Zhongwen - A Chinese-English Pop-Up Dictionary
  Copyright (C) 2010-2023 Christian Schiller
  https://chrome.google.com/extensions/detail/kkmlkkjojmombglmlpbpapmhcaljjkde
 
@@ -44,12 +48,10 @@
 
  */
 
-/* global globalThis */
-
 'use strict';
 
 // Define interfaces for the configuration and search results
-interface ZhongwenConfig {
+interface TiengvietConfig {
   css: string;
   tonecolors: string;
   fontSize: string;
@@ -81,15 +83,10 @@ interface SearchResult {
   originalText?: string;
 }
 
-// Declare jQuery
-// declare const $: any;
-
-console.log('Zhongwen content script loaded', { window, document, d: 'HERE' });
-
 const mainDivId = 'tiengvietDiv';
 const tiengvietWindowId = 'tiengviet-window';
 
-let config: ZhongwenConfig;
+let config: TiengvietConfig;
 
 let savedTarget: HTMLElement | null = null;
 
@@ -132,12 +129,13 @@ const zwnj = /\u200c/g;
 
 function enableTab(): void {
   document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('keydown', onKeyDown);
+  // TODO: return to using keydown events
+  // document.addEventListener('keydown', onKeyDown);
 }
 
 function disableTab(): void {
   document.removeEventListener('mousemove', onMouseMove);
-  document.removeEventListener('keydown', onKeyDown);
+  // document.removeEventListener('keydown', onKeyDown);
 
   const popup = document.getElementById(tiengvietWindowId);
   if (popup) {
@@ -665,7 +663,7 @@ function getText(
   const originalOffset = offset;
   if (offset > 0 && startNode.textContent) {
     // Check if we're already at the beginning of a word
-    const isWordBoundary = (char: string) => /\s|[.,;:!?()[\]{}'"<>]/.test(char);
+    const isWordBoundary = (char: string): boolean => /\s|[.,;:!?()[\]{}'"<>]/.test(char);
     const prevChar = startNode.textContent[offset - 1];
 
     // If the previous character is not a word boundary, we're in the middle of a word
@@ -690,6 +688,8 @@ function getText(
     node: startNode,
     offset: endIndex,
   });
+
+  console.log('getText', { firstText: text, selEndList });
 
   let nextNode: Node | null = startNode;
   while (
@@ -899,7 +899,7 @@ function clearHighlight(): void {
 }
 
 function isVisible(): boolean {
-  let popup = document.getElementById(tiengvietWindowId);
+  const popup = document.getElementById(tiengvietWindowId);
   return popup !== null && popup.style.display !== 'none';
 }
 
@@ -944,13 +944,15 @@ function findNextTextNode(root: Node | null, previous: Node): Node | null {
   }
   const nodeIterator = document.createNodeIterator(root, NodeFilter.SHOW_TEXT, null);
   let node = nodeIterator.nextNode();
+  console.log('findNextTextNode', { root, previous, node });
   while (node !== previous) {
     node = nodeIterator.nextNode();
     if (node === null) {
-      return findNextTextNode(root.parentNode!, previous);
+      return findNextTextNode(root.parentNode, previous);
     }
   }
   const result = nodeIterator.nextNode();
+  console.log('findNextTextNode result', { result });
   if (result !== null) {
     return result;
   } else {
@@ -989,7 +991,6 @@ function copyToClipboard(data: string): void {
 }
 
 function makeHtml(result: SearchResult, showToneColors: boolean = true): string {
-  console.log('makeHtml', { result, showToneColors });
   let html = '';
   const texts: Array<Array<string>> & {
     grammar?: { keyword: string; index: number };
@@ -1025,8 +1026,6 @@ function makeHtml(result: SearchResult, showToneColors: boolean = true): string 
   savedSearchResults = texts;
   savedSearchResults.grammar = result.grammar;
   savedSearchResults.vocab = result.vocab;
-
-  console.log({ html });
 
   return html;
 }
@@ -1089,7 +1088,7 @@ function detectVietnameseTone(word: string): string {
 }
 
 const miniHelp = `
-    <span style="font-weight: bold;">Zhongwen Chinese-English Dictionary</span><br><br>
+    <span style="font-weight: bold;">Tiengviet Vietnamese-English Dictionary</span><br><br>
     <p>Keyboard shortcuts:<p>
     <table style="margin: 10px;" cellspacing=5 cellpadding=5>
     <tr><td><b>n&nbsp;:</b></td><td>&nbsp;Next word</td></tr>
@@ -1134,18 +1133,14 @@ chrome.runtime.onMessage.addListener((request) => {
     case 'disable':
       disableTab();
       break;
-    case 'showPopup':
-      if (!request.isHelp || window === window.top) {
-        showPopup(request.text);
-      }
-      break;
-    case 'showHelp':
-      showPopup(miniHelp);
-      break;
+    // case 'showPopup':
+    //   if (!request.isHelp || window === window.top) {
+    //     showPopup(request.text);
+    //   }
+    //   break;
+    // case 'showHelp':
+    //   showPopup(miniHelp);
+    //   break;
     default:
   }
 });
-
-// chrome.runtime.sendMessage({ type: 'search', query: 'query' }, (response) => {
-//   console.log('Results:', response.results);
-// });
