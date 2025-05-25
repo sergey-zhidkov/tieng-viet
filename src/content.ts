@@ -552,7 +552,6 @@ function triggerSearch(): number {
   const selStartOffset = savedRangeOffset + selStartDelta;
 
   selStartIncrement = 1;
-  console.log('triggerSearch', { rangeNode, selStartOffset });
 
   if (rangeNode.nodeType !== Node.TEXT_NODE || !rangeNode.textContent) {
     clearHighlight();
@@ -571,7 +570,7 @@ function triggerSearch(): number {
 
   // Workaround for Google Docs: remove zero-width non-joiner &zwnj;
   const text = originalText.replace(zwnj, '');
-  console.log('triggerSearch', { text });
+  // console.log('triggerSearch', { text });
 
   savedSelStartOffset = selStartOffset;
   savedSelEndList = selEndList;
@@ -589,7 +588,7 @@ function triggerSearch(): number {
 }
 
 function processSearchResult(result: SearchResult | null): void {
-  console.log('processSearchResult', { result });
+  // console.log('processSearchResult', { result });
   const selStartOffset = savedSelStartOffset;
   const selEndList = savedSelEndList;
 
@@ -738,7 +737,7 @@ function getText(
     offset: endIndex,
   });
 
-  console.log('getText', { firstText: text, selEndList });
+  // console.log('getText', { firstText: text, selEndList });
 
   let nextNode: Node | null = startNode;
   let previousNode: Node | null = startNode;
@@ -926,8 +925,6 @@ function highlightMatch(
   let selEnd;
   let offset = adjustedRangeStartOffset + matchLen;
 
-  console.log('highlightMatch', { adjustedRangeStartOffset, offset });
-
   for (let i = 0, len = selEndList.length; i < len; i++) {
     selEnd = selEndList[i];
     if (offset <= selEnd.offset) {
@@ -935,7 +932,6 @@ function highlightMatch(
     }
     offset -= selEnd.offset;
   }
-  console.log('highlightMatch after', { offset });
 
   const range = doc.createRange();
   range.setStart(rangeStartNode, adjustedRangeStartOffset);
@@ -1008,7 +1004,6 @@ function findNextTextNode(root: Node | null, previous: Node): Node | null {
   }
   const nodeIterator = document.createNodeIterator(root, NodeFilter.SHOW_TEXT, null);
   let node = nodeIterator.nextNode();
-  console.log('findNextTextNode', { root, previous, node });
   while (node !== previous) {
     node = nodeIterator.nextNode();
     if (node === null) {
@@ -1016,7 +1011,6 @@ function findNextTextNode(root: Node | null, previous: Node): Node | null {
     }
   }
   const result = nodeIterator.nextNode();
-  console.log('findNextTextNode result', { result });
   if (result !== null) {
     return result;
   } else {
@@ -1188,7 +1182,6 @@ const miniHelp = `
 
 // event listener
 chrome.runtime.onMessage.addListener((request) => {
-  console.log('onMessage', request);
   switch (request.type) {
     case 'enable':
       enableTab();

@@ -147,7 +147,7 @@ function sendTabMessage(tabId: number): void {
 }
 
 function activateExtension(tabId: number, showHelp: boolean): void {
-  console.log('Activating extension', { tabId, showHelp });
+  // console.log('Activating extension', { tabId, showHelp });
   chrome.storage.local.set({ enabled: '1' });
   chrome.storage.local.set({ activated: '1' });
   // isActivated = true;
@@ -335,7 +335,7 @@ chrome.runtime.onMessage.addListener((request: MessageRequest, sender, callback)
       {
         ensureDictLoaded().then((tiengvietDict: TiengvietDictionary) => {
           const response = tiengvietDict.search((request as { text: string })?.text);
-          console.log('Search results:', { results: response });
+          // console.log('Search results:', { results: response });
           if (response) {
             response.originalText = request.originalText;
           }
@@ -461,7 +461,7 @@ class TiengvietDictionary {
         entry.data.push([dentry.at(0), currentQuery]);
       }
 
-      console.log('Searching for:', currentQuery, { dentry });
+      // console.log('Searching for:', currentQuery, { dentry });
 
       // Check if the rightmost character is an alphabet character
       if (currentQuery.length > 0) {
