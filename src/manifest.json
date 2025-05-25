@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "TiengViet: Vietnamese-English Dictionary",
+  "short_name": "TiengViet",
+  "version": "1.0.0",
+  "homepage_url": "https://github.com/sergey-zhidkov/tieng-viet",
+  "description": "Great tool for learning Vietnamese. Translate words from Vietnamese to English when hovering over them.",
+  "icons": {
+    "128": "images/icon-128.png"
+  },
+  "action": {
+    "default_icon": "images/icon-128.png",
+    "default_title": "TiengViet Vietnamese Popup Dictionary"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["libs/jquery-3.3.1.min.js", "content.js"],
+      "css": ["css/content.css"],
+      "all_frames": true
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "permissions": ["contextMenus", "tabs", "storage", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "commands": {
+    "_execute_action": {
+      "description": "Enable/Disable TiengViet"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["css/*", "js/*", "images/*", "data/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
