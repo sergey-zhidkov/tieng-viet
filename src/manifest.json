@@ -6,12 +6,10 @@
   "homepage_url": "https://github.com/sergey-zhidkov/tieng-viet",
   "description": "Great tool for learning Vietnamese. Includes links to Vietnamese Grammar Wiki. Supports adding words to Skritter.",
   "icons": {
-    "16": "images/zhongwen16.png",
-    "48": "images/zhongwen48.png",
-    "128": "images/zhongwen.png"
+    "128": "images/icon-128.png"
   },
   "action": {
-    "default_icon": "images/zhongwen48.png",
+    "default_icon": "images/icon-128.png",
     "default_title": "TiengViet Vietnamese Popup Dictionary"
   },
   "background": {
