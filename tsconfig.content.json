@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "none",
+    "target": "es5",
+    "outDir": "./dist",
+    "strict": true,
+    "strictNullChecks": false,
+    // "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": "src",
+    "lib": ["DOM", "ES2022"]
+  },
+  "include": ["src/content.ts"]
+}
