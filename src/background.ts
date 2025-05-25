@@ -445,7 +445,6 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo) {
 
 chrome.runtime.onMessage.addListener((request: MessageRequest, sender, callback) => {
   console.log('Received message:', { request, sender });
-  // callback({ resp: 'ping' });
   let tabID: number | undefined;
 
   switch (request.type) {
@@ -453,19 +452,12 @@ chrome.runtime.onMessage.addListener((request: MessageRequest, sender, callback)
       {
         ensureDictLoaded().then((tiengvietDict: TiengvietDictionary) => {
           const response = tiengvietDict.search((request as { text: string })?.text);
-          // const response = searchDictionary(tiengvietDict, (request as { text: string })?.text);
           console.log('Search results:', { results: response });
           if (response) {
             response.originalText = request.originalText;
           }
           callback(response);
         });
-
-        // let response = search(request.text);
-        // if (response) {
-        //   response.originalText = request.originalText;
-        // }
-        // callback(response);
       }
       break;
 
@@ -593,51 +585,6 @@ async function ensureDictLoaded(): Promise<TiengvietDictionary> {
   return tiengvietDict;
 }
 
-function searchDictionary(tiengvietDict: TiengvietDictionary, query: string) {
-  const entry: IDictionaryEntry = { data: [], matchLen: 0 };
-  query = query.toLocaleLowerCase();
-
-  console.log({ query });
-
-  let currentQuery = query;
-  let maxLen = 0;
-
-  while (currentQuery.length > 0) {
-    const dentry = tiengvietDict.getWordEntry(currentQuery.toLocaleLowerCase());
-
-    if (dentry) {
-      if (maxLen < currentQuery.length) {
-        maxLen = currentQuery.length;
-      }
-      entry.data.push([dentry.at(0), currentQuery]);
-    }
-
-    console.log('Searching for:', currentQuery, { dentry });
-
-    // Check if the rightmost character is an alphabet character
-    if (currentQuery.length > 0) {
-      const lastChar = currentQuery.charAt(currentQuery.length - 1);
-      const isAlphabet = /\p{L}/u.test(lastChar);
-
-      if (isAlphabet) {
-        // If it's an alphabet character, remove all characters until we meet non-alphabet characters
-        let i = currentQuery.length - 1;
-        while (i >= 0 && /\p{L}/u.test(currentQuery.charAt(i))) {
-          i--;
-        }
-        currentQuery = currentQuery.substring(0, i + 1);
-      } else {
-        // If it's not an alphabet character, remove just one character
-        currentQuery = currentQuery.substring(0, currentQuery.length - 1);
-      }
-    }
-    currentQuery = currentQuery.trimEnd();
-  }
-
-  entry.matchLen = maxLen;
-  return entry;
-}
-
 class TiengvietDictionary {
   dict: Record<string, string[]>;
 
@@ -660,8 +607,49 @@ class TiengvietDictionary {
     return dict;
   }
 
-  search(word: string): IDictionaryEntry | null {
-    return searchDictionary(this, word);
+  search(query: string): IDictionaryEntry | null {
+    const entry: IDictionaryEntry = { data: [], matchLen: 0 };
+    query = query.toLocaleLowerCase();
+
+    console.log({ query });
+
+    let currentQuery = query;
+    let maxLen = 0;
+
+    while (currentQuery.length > 0) {
+      const dentry = tiengvietDict.getWordEntry(currentQuery.toLocaleLowerCase());
+
+      if (dentry) {
+        if (maxLen < currentQuery.length) {
+          maxLen = currentQuery.length;
+        }
+        entry.data.push([dentry.at(0), currentQuery]);
+      }
+
+      console.log('Searching for:', currentQuery, { dentry });
+
+      // Check if the rightmost character is an alphabet character
+      if (currentQuery.length > 0) {
+        const lastChar = currentQuery.charAt(currentQuery.length - 1);
+        const isAlphabet = /\p{L}/u.test(lastChar);
+
+        if (isAlphabet) {
+          // If it's an alphabet character, remove all characters until we meet non-alphabet characters
+          let i = currentQuery.length - 1;
+          while (i >= 0 && /\p{L}/u.test(currentQuery.charAt(i))) {
+            i--;
+          }
+          currentQuery = currentQuery.substring(0, i + 1);
+        } else {
+          // If it's not an alphabet character, remove just one character
+          currentQuery = currentQuery.substring(0, currentQuery.length - 1);
+        }
+      }
+      currentQuery = currentQuery.trimEnd();
+    }
+
+    entry.matchLen = maxLen;
+    return entry;
   }
 
   getWordEntry(word: string): string[] | undefined {
