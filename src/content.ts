@@ -566,23 +566,6 @@ function triggerSearch(): number {
     return 2;
   }
 
-  // TODO: is Vietnamese character?
-  // let u = rangeNode.textContent.charCodeAt(selStartOffset);
-  // let isChineseCharacter =
-  //   !isNaN(u) &&
-  //   (u === 0x25cb ||
-  //     (0x3400 <= u && u <= 0x9fff) ||
-  //     (0xf900 <= u && u <= 0xfaff) ||
-  //     (0xff21 <= u && u <= 0xff3a) ||
-  //     (0xff41 <= u && u <= 0xff5a) ||
-  //     (0xd800 <= u && u <= 0xdfff));
-
-  // if (!isChineseCharacter) {
-  //   clearHighlight();
-  //   hidePopup();
-  //   return 3;
-  // }
-
   const selEndList: SelEndItem[] = [];
   const originalText = getText(rangeNode, selStartOffset, selEndList, 90 /*maxlength*/);
 
@@ -625,7 +608,6 @@ function processSearchResult(result: SearchResult | null): void {
     index++;
   }
 
-  console.log('>>> highlight', { index, matchLen: result.matchLen, selEndList });
   const highlightLength = index;
 
   selStartIncrement = result.matchLen;
@@ -644,6 +626,73 @@ function processSearchResult(result: SearchResult | null): void {
   }
 
   showPopup(makeHtml(result, config.tonecolors !== 'no'), savedTarget, popX, popY, false);
+}
+
+// Helper function to determine if we should add a space between two nodes
+function shouldAddSpaceBetweenNodes(prevNode: Node, nextNode: Node): boolean {
+  if (!prevNode || !nextNode) {
+    return false;
+  }
+
+  const prevParent = prevNode.parentNode;
+  const nextParent = nextNode.parentNode;
+
+  if (!prevParent || !nextParent) {
+    return false;
+  }
+
+  // Get the element names
+  const prevElementName = prevParent.nodeName?.toLowerCase();
+  const nextElementName = nextParent.nodeName?.toLowerCase();
+
+  // Elements that should have spaces between them
+  const blockElements = new Set([
+    'td',
+    'th',
+    'li',
+    'p',
+    'div',
+    'span',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'article',
+    'section',
+    'aside',
+    'header',
+    'footer',
+    'nav',
+    'main',
+    'blockquote',
+    'pre',
+    'address',
+    'figure',
+    'figcaption',
+  ]);
+
+  // If we're transitioning between different parent elements that are block-level
+  if (prevParent !== nextParent) {
+    if (blockElements.has(prevElementName) || blockElements.has(nextElementName)) {
+      return true;
+    }
+  }
+
+  // Special case for table cells - always add space between different TD/TH elements
+  if (
+    prevElementName === 'td' ||
+    prevElementName === 'th' ||
+    nextElementName === 'td' ||
+    nextElementName === 'th'
+  ) {
+    if (prevParent !== nextParent) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 // modifies selEndList as a side-effect
@@ -692,13 +741,28 @@ function getText(
   console.log('getText', { firstText: text, selEndList });
 
   let nextNode: Node | null = startNode;
+  let previousNode: Node | null = startNode;
+
   while (
     text.length < maxLength &&
     nextNode &&
     nextNode.parentNode &&
     (nextNode = findNextTextNode(nextNode.parentNode, nextNode)) !== null
   ) {
-    text += getTextFromSingleNode(nextNode, selEndList, maxLength - text.length);
+    // Check if we should add a space between the previous and current node
+    if (shouldAddSpaceBetweenNodes(previousNode, nextNode)) {
+      // Only add space if the current text doesn't already end with whitespace
+      if (text.length > 0 && !/\s$/.test(text)) {
+        text += ' ';
+        if (text.length >= maxLength) {
+          break;
+        }
+      }
+    }
+
+    const nodeText = getTextFromSingleNode(nextNode, selEndList, maxLength - text.length);
+    text += nodeText;
+    previousNode = nextNode;
   }
 
   return text;
