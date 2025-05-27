@@ -566,7 +566,6 @@ function triggerSearch(): number {
 
   // Workaround for Google Docs: remove zero-width non-joiner &zwnj;
   const text = originalText.replace(zwnj, '');
-  console.log('triggerSearch', { text });
 
   savedSelStartOffset = selStartOffset;
   savedSelEndList = selEndList;
@@ -647,7 +646,6 @@ function shouldAddSpaceBetweenNodes(prevNode: Node, nextNode: Node): boolean {
     'li',
     'p',
     'div',
-    'span',
     'h1',
     'h2',
     'h3',
