@@ -177,7 +177,8 @@
 /* Standard Tone Colors */
 /* Sắc (high-rising) */
 #tiengviet-window.tonecolor-standard .tone1 {
-  color: #ee363e;
+  /* color: #ee363e; */
+  color: #f47c36;
 }
 
 /* Huyền (low-falling) */
@@ -189,7 +190,10 @@
 /* Hỏi (dipping-rising) - orange or purple */
 #tiengviet-window.tonecolor-standard .tone3 {
   /* color: #73bb4f; */
-  color: #f47c36;
+  /* color: #f47c36; */
+  color: #8000b0;
+  /* color: #9932cc; */
+  /* color: #7B68EE; */
 }
 
 /* Ngã (creaky rising) */
@@ -207,7 +211,8 @@
 }
 
 #tiengviet-window.tonecolor-standard .tone6 {
-  color: #000000;
+  /* color: #000000; */
+  color: #ee363e;
 }
 
 /* Pleco Tone Colors */
